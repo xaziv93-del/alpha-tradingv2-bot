@@ -93,20 +93,14 @@ def technical_score(symbol):
 
 def sentiment_score(symbol):
     try:
-        url = f"https://finnhub.io/api/v1/news?category=general&token={FINNHUB_API_KEY}"
+        url = f"https://finnhub.io/api/v1/company-news?symbol={symbol}&from=2024-01-01&to=2025-12-31&token={FINNHUB_API_KEY}"
         news = requests.get(url).json()
 
-        score = 0
+        score = len(news[:10])  # number of recent articles
 
-        for article in news[:10]:
-            headline = article.get("headline", "").lower()
-
-            if symbol.lower() in headline:
-                score += 1
-
-        if score >= 5:
+        if score >= 8:
             signal = "🔥 High Hype"
-        elif score >= 2:
+        elif score >= 3:
             signal = "📢 Building Attention"
         else:
             signal = "😐 Low Buzz"
