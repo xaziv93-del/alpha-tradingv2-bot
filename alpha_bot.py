@@ -7,9 +7,12 @@ TOKEN = os.getenv("BOT_TOKEN")
 FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 
 stocks = {
-    "AI": ["NVDA", "AMD"],
-    "Space": ["RKLB"],
-    "Tech": ["PLTR", "TSLA"]
+    "AI": ["NVDA", "AMD", "SMCI", "MSFT", "GOOGL"],
+    "Semiconductors": ["TSM", "ASML", "AVGO"],
+    "Defense": ["LMT", "RTX", "NOC", "PLTR"],
+    "Space": ["RKLB", "ASTS", "SPCE"],
+    "Energy": ["XOM", "CVX", "SLB", "NEE"],
+    "Biotech": ["MRNA", "BNTX", "CRSP", "VRTX"]
 }
 
 def get_price_data(symbol):
