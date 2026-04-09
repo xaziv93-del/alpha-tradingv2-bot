@@ -17,6 +17,42 @@ def get_price_data(symbol):
     res = requests.get(url).json()
     return res
 
+def smart_money_score(symbol):
+    try:
+        url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
+        data = requests.get(url).json()
+
+        current = data.get("c")
+        prev_close = data.get("pc")
+
+        if not current or not prev_close:
+            return 0, "No data"
+
+        change_pct = (current - prev_close) / prev_close
+
+        score = 0
+
+        if change_pct > 0.01:
+            score += 1
+        if change_pct > 0.02:
+            score += 1
+        if change_pct > 0.03:
+            score += 1
+        if change_pct > 0.05:
+            score += 2
+
+        if score >= 4:
+            signal = "🔥 Strong Buying Pressure"
+        elif score >= 2:
+            signal = "📈 Accumulation"
+        else:
+            signal = "😐 Weak Flow"
+
+        return min(score, 5), signal
+
+    except:
+        return 0, "Error"
+
 def technical_score(symbol):
     try:
         data = get_price_data(symbol)
