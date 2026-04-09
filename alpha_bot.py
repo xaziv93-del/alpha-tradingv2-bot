@@ -125,13 +125,13 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     for sector, tickers in stocks.items():
         for stock in tickers:
-            tech = technical_score(stock)
-            flow_score, flow_signal = smart_money_score(stock)
+          tech, flow, flow_signal = analyze_stock(stock)
+          sent, sent_signal = sentiment_score(stock)
 
-            total = tech + flow_score
+          total = tech + flow + sent
 
-            results.append((stock, sector, total, tech, flow_score, flow_signal))
-
+    results.append((stock, sector, total, tech, flow, sent, flow_signal, sent_signal))  
+    
     results.sort(key=lambda x: x[2], reverse=True)
 
     message = "🚨 ALPHA SCAN (REAL DATA + FLOW)\n\n"
