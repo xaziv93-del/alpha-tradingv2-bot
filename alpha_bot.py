@@ -125,23 +125,26 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     for sector, tickers in stocks.items():
         for stock in tickers:
-          tech, flow, flow_signal = analyze_stock(stock)
-          sent, sent_signal = sentiment_score(stock)
 
-          total = tech + flow + sent
+            # FIX: use your existing functions
+            tech = technical_score(stock)
+            flow, flow_signal = smart_money_score(stock)
+            sent, sent_signal = sentiment_score(stock)
 
-    results.append((stock, sector, total, tech, flow, sent, flow_signal, sent_signal))  
-    
+            total = tech + flow + sent
+
+            results.append((stock, sector, total, tech, flow, sent, flow_signal, sent_signal))
+
     results.sort(key=lambda x: x[2], reverse=True)
 
     message = "🚨 FULL ALPHA SCAN (TECH + FLOW + SENTIMENT)\n\n"
 
-for stock, sector, total, tech, flow, sent, flow_signal, sent_signal in results:
-    message += (
-        f"{stock} ({sector}) | Score: {total}/15\n"
-        f"Tech: {tech}/5 | Flow: {flow}/5 | Sent: {sent}/5\n"
-        f"{flow_signal} | {sent_signal}\n\n"
-    )
+    for stock, sector, total, tech, flow, sent, flow_signal, sent_signal in results:
+        message += (
+            f"{stock} ({sector}) | Score: {total}/15\n"
+            f"Tech: {tech}/5 | Flow: {flow}/5 | Sent: {sent}/5\n"
+            f"{flow_signal} | {sent_signal}\n\n"
+        )
 
     await update.message.reply_text(message)
 app = ApplicationBuilder().token(TOKEN).build()
