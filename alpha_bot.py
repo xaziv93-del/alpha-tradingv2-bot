@@ -16,12 +16,16 @@ stocks = {
     "Biotech": ["MRNA", "BNTX", "CRSP", "VRTX"]
 }
 
+# ---------------- DATA ----------------
+
 def get_price_data(symbol):
     try:
         url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
         return requests.get(url).json()
     except:
         return {}
+
+# ---------------- TECH ----------------
 
 def technical_score(symbol):
     try:
@@ -47,9 +51,10 @@ def technical_score(symbol):
             score += 1
 
         return score
-
     except:
         return 0
+
+# ---------------- FLOW ----------------
 
 def smart_money_score(symbol):
     try:
@@ -80,9 +85,10 @@ def smart_money_score(symbol):
             signal = "😐 Weak Flow"
 
         return min(score, 5), signal
-
     except:
         return 0, "Error"
+
+# ---------------- SENTIMENT ----------------
 
 def sentiment_score(symbol):
     try:
@@ -99,9 +105,32 @@ def sentiment_score(symbol):
             signal = "😐 Low Buzz"
 
         return min(score, 5), signal
-
     except:
         return 0, "Error"
+
+# ---------------- CATALYST ----------------
+
+def catalyst_score(symbol):
+    try:
+        url = f"https://finnhub.io/api/v1/calendar/earnings?symbol={symbol}&token={FINNHUB_API_KEY}"
+        data = requests.get(url).json()
+
+        earnings = data.get("earningsCalendar", [])
+
+        if not earnings:
+            return 0, "No Catalyst"
+
+        next_event = earnings[0]
+        date = next_event.get("date")
+
+        score = 3
+        signal = f"📅 Earnings Soon ({date})"
+
+        return score, signal
+    except:
+        return 0, "No Data"
+
+# ---------------- BOT ----------------
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Alpha Scanner Bot Online 🚀")
@@ -116,12 +145,13 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             tech = technical_score(stock)
             flow, flow_signal = smart_money_score(stock)
             sent, sent_signal = sentiment_score(stock)
+            cat, cat_signal = catalyst_score(stock)
 
-            total = tech + flow + sent
+            total = tech + flow + sent + cat
 
-            results.append((stock, sector, total, tech, flow, sent, flow_signal, sent_signal))
+            results.append((stock, sector, total, tech, flow, sent, cat, flow_signal, sent_signal, cat_signal))
 
-    # 🔥 Sector ranking
+    # -------- Sector ranking --------
     sector_scores = {}
 
     for stock, sector, total, *_ in results:
@@ -139,8 +169,8 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Sort stocks
     results.sort(key=lambda x: x[2], reverse=True)
 
-    # 🔥 Build message
-    message = "🚨 FULL ALPHA SCAN (MARKET VIEW)\n\n"
+    # -------- Message --------
+    message = "🚨 FULL ALPHA SCAN (ELITE MODE)\n\n"
 
     message += "📊 TOP SECTORS:\n"
     for sector, score in sorted_sectors:
@@ -148,11 +178,11 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message += "\n🔥 STOCKS:\n\n"
 
-    for stock, sector, total, tech, flow, sent, flow_signal, sent_signal in results:
+    for stock, sector, total, tech, flow, sent, cat, flow_signal, sent_signal, cat_signal in results:
         message += (
-            f"{stock} ({sector}) | Score: {total}/15\n"
-            f"Tech: {tech}/5 | Flow: {flow}/5 | Sent: {sent}/5\n"
-            f"{flow_signal} | {sent_signal}\n\n"
+            f"{stock} ({sector}) | Score: {total}/20\n"
+            f"Tech: {tech}/5 | Flow: {flow}/5 | Sent: {sent}/5 | Cat: {cat}/5\n"
+            f"{flow_signal} | {sent_signal} | {cat_signal}\n\n"
         )
 
     await update.message.reply_text(message)
