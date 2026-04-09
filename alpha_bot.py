@@ -91,6 +91,31 @@ def technical_score(symbol):
         print(f"Error {symbol}: {e}")
         return 0
 
+def sentiment_score(symbol):
+    try:
+        url = f"https://finnhub.io/api/v1/news?category=general&token={FINNHUB_API_KEY}"
+        news = requests.get(url).json()
+
+        score = 0
+
+        for article in news[:10]:
+            headline = article.get("headline", "").lower()
+
+            if symbol.lower() in headline:
+                score += 1
+
+        if score >= 5:
+            signal = "🔥 High Hype"
+        elif score >= 2:
+            signal = "📢 Building Attention"
+        else:
+            signal = "😐 Low Buzz"
+
+        return min(score, 5), signal
+
+    except:
+        return 0, "Error"
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Alpha Scanner Bot Online 🚀")
 
