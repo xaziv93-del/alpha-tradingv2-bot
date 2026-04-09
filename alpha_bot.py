@@ -7,15 +7,32 @@ import datetime
 TOKEN = os.getenv("BOT_TOKEN")
 FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 
-# ---------------- SECTORS ----------------
+# ---------------- ELITE 60 STOCK UNIVERSE ----------------
 
 stocks = {
-    "AI": ["NVDA", "AMD", "MSFT", "GOOGL", "SMCI"],
-    "Semiconductors": ["TSM", "ASML", "AVGO"],
-    "Space": ["RKLB", "SPCE", "ASTS"],
-    "Defense": ["LMT", "RTX", "NOC", "PLTR"],
-    "Energy": ["XOM", "CVX", "NEE", "SLB"],
-    "Biotech": ["MRNA", "BNTX", "CRSP", "VRTX"]
+    "AI": [
+        "NVDA", "AMD", "MSFT", "GOOGL", "META",
+        "AMZN", "ORCL", "ADBE", "CRM", "NOW"
+    ],
+    "Semiconductors": [
+        "TSM", "ASML", "AVGO", "MU", "INTC",
+        "QCOM", "TXN", "LRCX", "KLAC", "AMAT"
+    ],
+    "Defense": [
+        "LMT", "RTX", "NOC", "GD", "BA",
+        "HII", "LHX", "PLTR"
+    ],
+    "Energy": [
+        "XOM", "CVX", "NEE", "SLB", "COP",
+        "EOG", "ENB", "ET"
+    ],
+    "Biotech": [
+        "MRNA", "BNTX", "CRSP", "VRTX", "REGN",
+        "ILMN", "NBIX", "ALNY", "BIIB", "GILD"
+    ],
+    "Space": [
+        "RKLB", "SPCE", "ASTS"
+    ]
 }
 
 # ---------------- DATA ----------------
@@ -49,7 +66,6 @@ def technical_score(symbol):
             score += 1
 
         return score
-
     except:
         return 0
 
@@ -58,7 +74,6 @@ def technical_score(symbol):
 def smart_money_score(symbol):
     try:
         data = get_price_data(symbol)
-
         current = data.get("c")
         prev_close = data.get("pc")
 
@@ -86,7 +101,6 @@ def smart_money_score(symbol):
             signal = "😐 Weak Flow"
 
         return min(score, 5), signal
-
     except:
         return 0, "Error"
 
@@ -98,8 +112,7 @@ def sentiment_score(symbol):
         news = requests.get(url).json()
 
         score = 0
-
-        for article in news[:15]:
+        for article in news[:20]:
             headline = article.get("headline", "").lower()
             if symbol.lower() in headline:
                 score += 1
@@ -110,7 +123,6 @@ def sentiment_score(symbol):
             return score, "📢 Building Attention"
         else:
             return score, "😐 Low Buzz"
-
     except:
         return 0, "Error"
 
@@ -119,41 +131,32 @@ def sentiment_score(symbol):
 def catalyst_score(symbol):
     try:
         today = datetime.datetime.utcnow().date()
-
         url = f"https://finnhub.io/api/v1/calendar/earnings?from={today}&to={today + datetime.timedelta(days=30)}&token={FINNHUB_API_KEY}"
         data = requests.get(url).json()
 
-        earnings_list = data.get("earningsCalendar", [])
-
-        for event in earnings_list:
+        for event in data.get("earningsCalendar", []):
             if event.get("symbol") == symbol:
-                date = event.get("date")
-                return 3, f"📅 Earnings Soon ({date})"
+                return 3, f"📅 Earnings ({event.get('date')})"
 
         return 0, "No Catalyst"
-
     except:
         return 0, "Error"
 
-# ---------------- SPACE ----------------
+# ---------------- SPECIAL CATALYSTS ----------------
 
 def space_catalyst(symbol):
     if symbol in ["RKLB", "SPCE", "ASTS"]:
         return 2, "🚀 Space Activity"
     return 0, "No Space Catalyst"
 
-# ---------------- DEFENSE ----------------
-
 def defense_catalyst(symbol):
-    if symbol in ["LMT", "RTX", "NOC", "PLTR"]:
-        return 2, "🛡 Defense Activity"
+    if symbol in ["LMT", "RTX", "NOC", "GD", "PLTR", "LHX"]:
+        return 2, "🛡 Defense Flow"
     return 0, "No Defense Catalyst"
 
-# ---------------- BIOTECH ----------------
-
 def biotech_catalyst(symbol):
-    if symbol in ["MRNA", "BNTX", "CRSP", "VRTX"]:
-        return 2, "💊 FDA / Drug Catalyst"
+    if symbol in ["MRNA", "BNTX", "CRSP", "VRTX", "REGN"]:
+        return 2, "💊 FDA Catalyst"
     return 0, "No Biotech Catalyst"
 
 # ---------------- BOT ----------------
@@ -179,14 +182,14 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             defense, defense_signal = defense_catalyst(stock)
             bio, bio_signal = biotech_catalyst(stock)
 
-            extra_cat = space + defense + bio
-            total = tech + flow + sent + cat + extra_cat
+            edge = space + defense + bio
+            total = tech + flow + sent + cat + edge
 
             sector_total += total
 
             results.append((
                 stock, sector, total,
-                tech, flow, sent, cat, extra_cat,
+                tech, flow, sent, cat, edge,
                 flow_signal, sent_signal, cat_signal,
                 f"{space_signal} | {defense_signal} | {bio_signal}"
             ))
@@ -195,24 +198,22 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     results.sort(key=lambda x: x[2], reverse=True)
 
-    # -------- MESSAGE --------
-
     message = "🚨 FULL ALPHA SCAN (ELITE MODE)\n\n"
 
     message += "📊 TOP SECTORS:\n"
     for sec, score in sorted(sector_scores.items(), key=lambda x: x[1], reverse=True):
         message += f"{sec}: {score}\n"
 
-    message += "\n🔥 STOCKS:\n\n"
+    message += "\n🔥 TOP 8 PLAYS:\n\n"
 
-    for r in results[:10]:
-        stock, sector, total, tech, flow, sent, cat, extra, flow_sig, sent_sig, cat_sig, extra_sig = r
+    for r in results[:8]:
+        stock, sector, total, tech, flow, sent, cat, edge, fs, ss, cs, extra = r
 
         message += (
-            f"{stock} ({sector}) | Score: {total}/25\n"
-            f"Tech: {tech}/5 | Flow: {flow}/5 | Sent: {sent}/5 | Cat: {cat}/5 | Edge: {extra}/5\n"
-            f"{flow_sig} | {sent_sig} | {cat_sig}\n"
-            f"{extra_sig}\n\n"
+            f"{stock} ({sector}) | {total}/25\n"
+            f"T:{tech} F:{flow} S:{sent} C:{cat} E:{edge}\n"
+            f"{fs} | {ss} | {cs}\n"
+            f"{extra}\n\n"
         )
 
     await update.message.reply_text(message)
