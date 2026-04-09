@@ -91,6 +91,9 @@ def technical_score(symbol):
         print(f"Error {symbol}: {e}")
         return 0
 
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Alpha Scanner Bot Online 🚀")
+
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     results = []
