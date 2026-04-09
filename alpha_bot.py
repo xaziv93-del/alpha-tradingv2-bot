@@ -134,14 +134,14 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     results.sort(key=lambda x: x[2], reverse=True)
 
-    message = "🚨 ALPHA SCAN (REAL DATA + FLOW)\n\n"
+    message = "🚨 FULL ALPHA SCAN (TECH + FLOW + SENTIMENT)\n\n"
 
-    for stock, sector, total, tech, flow, signal in results:
-        message += (
-            f"{stock} ({sector}) | Score: {total}/10\n"
-            f"Tech: {tech}/5 | Flow: {flow}/5\n"
-            f"{signal}\n\n"
-        )
+for stock, sector, total, tech, flow, sent, flow_signal, sent_signal in results:
+    message += (
+        f"{stock} ({sector}) | Score: {total}/15\n"
+        f"Tech: {tech}/5 | Flow: {flow}/5 | Sent: {sent}/5\n"
+        f"{flow_signal} | {sent_signal}\n\n"
+    )
 
     await update.message.reply_text(message)
 app = ApplicationBuilder().token(TOKEN).build()
