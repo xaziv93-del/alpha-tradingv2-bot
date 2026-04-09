@@ -98,20 +98,24 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for sector, tickers in stocks.items():
         for stock in tickers:
             tech = technical_score(stock)
-            results.append((stock, sector, tech))
+            flow_score, flow_signal = smart_money_score(stock)
+
+            total = tech + flow_score
+
+            results.append((stock, sector, total, tech, flow_score, flow_signal))
 
     results.sort(key=lambda x: x[2], reverse=True)
 
-    message = "🚨 REAL ALPHA SCAN (FINNHUB LIVE)\n\n"
+    message = "🚨 ALPHA SCAN (REAL DATA + FLOW)\n\n"
 
-    for stock, sector, score in results:
-        message += f"{stock} ({sector}) | Tech Score: {score}/5\n"
+    for stock, sector, total, tech, flow, signal in results:
+        message += (
+            f"{stock} ({sector}) | Score: {total}/10\n"
+            f"Tech: {tech}/5 | Flow: {flow}/5\n"
+            f"{signal}\n\n"
+        )
 
     await update.message.reply_text(message)
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Alpha Scanner Bot Online 🚀")
-
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
