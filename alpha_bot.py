@@ -1,57 +1,58 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import os
-import yfinance as yf
+import requests
 
 TOKEN = os.getenv("BOT_TOKEN")
+FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 
-# Focus sectors (your blueprint)
 stocks = {
     "AI": ["NVDA", "AMD"],
     "Space": ["RKLB"],
     "Tech": ["PLTR", "TSLA"]
 }
 
-def technical_score(ticker):
+def get_price_data(symbol):
+    url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
+    res = requests.get(url).json()
+    return res
+
+def technical_score(symbol):
     try:
-        data = yf.download(ticker, period="6mo", interval="1d")
+        data = get_price_data(symbol)
 
-        if data.empty or len(data) < 20:
+        current = data.get("c")  # current price
+        prev_close = data.get("pc")  # previous close
+
+        if not current or not prev_close:
             return 0
-
-        closes = data["Close"]
-
-        latest = closes.iloc[-1]
-        prev5 = closes.iloc[-5]
-        prev20 = closes.iloc[-20]
 
         score = 0
 
-        # Simple momentum (short-term)
-        if latest > prev5:
+        # Price up today
+        if current > prev_close:
             score += 1
 
-        # Medium trend
-        if latest > prev20:
+        # Strong move (>2%)
+        if (current - prev_close) / prev_close > 0.02:
             score += 1
 
-        # Moving average (safe version)
-        ma20 = closes.rolling(20).mean().iloc[-1]
-        if latest > ma20:
+        # Momentum proxy
+        if current > prev_close * 1.01:
             score += 1
 
-        # Recent strength
-        if (latest - prev5) / prev5 > 0.02:
+        # Trend proxy
+        if current > prev_close * 0.98:
             score += 1
 
-        # Volatility breakout (looser)
-        if latest > closes.iloc[-10:].max() * 0.98:
+        # Breakout proxy
+        if current > prev_close * 1.03:
             score += 1
 
         return score
 
     except Exception as e:
-        print(f"Error on {ticker}: {e}")
+        print(f"Error {symbol}: {e}")
         return 0
 
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -65,7 +66,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     results.sort(key=lambda x: x[2], reverse=True)
 
-    message = "🚨 REAL ALPHA SCAN (TECH + SECTOR)\n\n"
+    message = "🚨 REAL ALPHA SCAN (FINNHUB LIVE)\n\n"
 
     for stock, sector, score in results:
         message += f"{stock} ({sector}) | Tech Score: {score}/5\n"
