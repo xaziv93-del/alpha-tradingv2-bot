@@ -16,39 +16,42 @@ def technical_score(ticker):
     try:
         data = yf.download(ticker, period="6mo", interval="1d")
 
-        if data.empty or len(data) < 50:
+        if data.empty or len(data) < 20:
             return 0
 
-        data["MA50"] = data["Close"].rolling(50).mean()
+        closes = data["Close"]
 
-        latest = data.iloc[-1]
-        prev = data.iloc[-5]
+        latest = closes.iloc[-1]
+        prev5 = closes.iloc[-5]
+        prev20 = closes.iloc[-20]
 
         score = 0
 
-        # Above MA50
-        if latest["Close"] > latest["MA50"]:
+        # Simple momentum (short-term)
+        if latest > prev5:
             score += 1
 
-        # Momentum
-        if latest["Close"] > prev["Close"]:
+        # Medium trend
+        if latest > prev20:
             score += 1
 
-        # Strong trend
-        if data["Close"].iloc[-1] > data["Close"].iloc[-20]:
+        # Moving average (safe version)
+        ma20 = closes.rolling(20).mean().iloc[-1]
+        if latest > ma20:
             score += 1
 
-        # Volume spike
-        if latest["Volume"] > data["Volume"].rolling(10).mean().iloc[-1]:
+        # Recent strength
+        if (latest - prev5) / prev5 > 0.02:
             score += 1
 
-        # Breakout
-        if latest["Close"] == data["Close"].max():
+        # Volatility breakout (looser)
+        if latest > closes.iloc[-10:].max() * 0.98:
             score += 1
 
         return score
 
-    except:
+    except Exception as e:
+        print(f"Error on {ticker}: {e}")
         return 0
 
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
