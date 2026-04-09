@@ -1,53 +1,71 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import os
-import random
+import yfinance as yf
 
 TOKEN = os.getenv("BOT_TOKEN")
 
-stocks = ["NVDA", "PLTR", "RKLB", "AMD", "TSLA"]
+# Focus sectors (your blueprint)
+stocks = {
+    "AI": ["NVDA", "AMD"],
+    "Space": ["RKLB"],
+    "Tech": ["PLTR", "TSLA"]
+}
 
-# --- TECH SCORE (FIXED SIMPLE VERSION) ---
-def technical_score():
-    return random.randint(1,5)
+def technical_score(ticker):
+    try:
+        data = yf.download(ticker, period="6mo", interval="1d")
 
-# --- OPTIONS FLOW (SMART MONEY SIMULATION) ---
-def options_flow_score():
-    score = random.randint(1,5)
+        if data.empty or len(data) < 50:
+            return 0
 
-    signal = ""
-    if score >= 4:
-        signal = "🔥 Heavy Call Buying"
-    elif score == 3:
-        signal = "📈 Moderate Flow"
-    else:
-        signal = "😐 Weak Flow"
+        data["MA50"] = data["Close"].rolling(50).mean()
 
-    return score, signal
+        latest = data.iloc[-1]
+        prev = data.iloc[-5]
 
-# --- SCAN ---
+        score = 0
+
+        # Above MA50
+        if latest["Close"] > latest["MA50"]:
+            score += 1
+
+        # Momentum
+        if latest["Close"] > prev["Close"]:
+            score += 1
+
+        # Strong trend
+        if data["Close"].iloc[-1] > data["Close"].iloc[-20]:
+            score += 1
+
+        # Volume spike
+        if latest["Volume"] > data["Volume"].rolling(10).mean().iloc[-1]:
+            score += 1
+
+        # Breakout
+        if latest["Close"] == data["Close"].max():
+            score += 1
+
+        return score
+
+    except:
+        return 0
+
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    
+
     results = []
 
-    for stock in stocks:
-        tech = technical_score()
-        options_score, flow_signal = options_flow_score()
+    for sector, tickers in stocks.items():
+        for stock in tickers:
+            tech = technical_score(stock)
+            results.append((stock, sector, tech))
 
-        total = tech + options_score
+    results.sort(key=lambda x: x[2], reverse=True)
 
-        results.append((stock, total, tech, options_score, flow_signal))
+    message = "🚨 REAL ALPHA SCAN (TECH + SECTOR)\n\n"
 
-    results.sort(key=lambda x: x[1], reverse=True)
-
-    message = "🚨 ALPHA SCAN (TECH + SMART MONEY)\n\n"
-
-    for stock, total, tech, opt, signal in results[:3]:
-        message += (
-            f"{stock} | Score: {total}/10\n"
-            f"Tech: {tech}/5 | Options: {opt}/5\n"
-            f"{signal}\n\n"
-        )
+    for stock, sector, score in results:
+        message += f"{stock} ({sector}) | Tech Score: {score}/5\n"
 
     await update.message.reply_text(message)
 
