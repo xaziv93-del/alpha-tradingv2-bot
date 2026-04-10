@@ -94,20 +94,42 @@ def options_flow(symbol):
 
 # -------- SENTIMENT --------
 def sentiment(symbol):
-    url = f"https://finnhub.io/api/v1/news?category=general&token={FINNHUB_API_KEY}"
-    news = requests.get(url).json()
+    try:
+        url = f"https://finnhub.io/api/v1/news?category=general&token={FINNHUB_API_KEY}"
+        news = requests.get(url).json()
 
-    score = 0
-    for n in news[:10]:
-        if symbol.lower() in n.get("headline", "").lower():
-            score += 1
+        score = 0
 
-    if score >= 5:
-        return 5, "🔥 High Hype"
-    elif score >= 2:
-        return score, "📢 Building Attention"
-    else:
-        return score, "😐 Low Buzz"
+        hype_words = [
+            "surge", "rally", "soars", "breakout",
+            "beats", "bullish", "upgrade", "strong",
+            "explosive", "record", "momentum"
+        ]
+
+        for article in news[:20]:
+            headline = article.get("headline", "").lower()
+
+            if symbol.lower() in headline:
+                score += 1
+
+                for word in hype_words:
+                    if word in headline:
+                        score += 1  # bonus hype
+
+        # cap score
+        score = min(score, 5)
+
+        if score >= 4:
+            signal = "🔥 Viral Hype Building"
+        elif score >= 2:
+            signal = "📢 Social Attention Rising"
+        else:
+            signal = "😐 No Hype"
+
+        return score, signal
+
+    except:
+        return 0, "Error"
 
 # -------- AI SCORE --------
 def ai_score(tech, flow, sent, opt):
