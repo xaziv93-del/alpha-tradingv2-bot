@@ -18,6 +18,7 @@ stocks = {
     "Biotech": ["MRNA", "BNTX", "VRTX", "CRSP"]
 }
 
+# -------- DATA --------
 def get_price(symbol):
     url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
     return requests.get(url).json()
@@ -66,7 +67,7 @@ def smart_money(symbol):
 
     return min(score, 5), signal
 
-# -------- OPTIONS FLOW (PROXY) --------
+# -------- OPTIONS FLOW --------
 def options_flow(symbol):
     data = get_price(symbol)
     c = data.get("c")
@@ -78,13 +79,9 @@ def options_flow(symbol):
     move = (c - pc) / pc
 
     score = 0
-
-    if move > 0.02:
-        score += 2
-    if move > 0.04:
-        score += 2
-    if move > 0.06:
-        score += 1
+    if move > 0.02: score += 2
+    if move > 0.04: score += 2
+    if move > 0.06: score += 1
 
     if score >= 4:
         signal = "💰 Heavy Options Activity"
@@ -112,20 +109,33 @@ def sentiment(symbol):
     else:
         return score, "😐 Low Buzz"
 
-# -------- AI SCORE V2 --------
+# -------- AI SCORE --------
 def ai_score(tech, flow, sent, opt):
-    score = (
+    return round(
         tech * 0.25 +
         flow * 0.35 +
         opt * 0.25 +
-        sent * 0.15
+        sent * 0.15,
+        2
     )
-    return round(score, 2)
 
-# -------- CRASH DETECTOR --------
-def crash_detector(results):
-    weak = sum(1 for r in results if r[2] < 6)
-    return weak > len(results) * 0.6
+# -------- NO TRADE DAY --------
+def no_trade_day(results):
+    total = len(results)
+
+    low_scores = sum(1 for r in results if r[2] < 6)
+    weak_flow = sum(1 for r in results if r[4] <= 1)
+
+    strong = [
+        r for r in results
+        if r[4] >= 3 and r[6] >= 3 and r[2] >= 10
+    ]
+
+    cond1 = low_scores > total * 0.6
+    cond2 = weak_flow > total * 0.6
+    cond3 = len(strong) == 0
+
+    return cond1 and cond2 and cond3
 
 # -------- SCAN --------
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -134,28 +144,30 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for sector, tickers in stocks.items():
         for stock in tickers:
             tech = technical_score(stock)
-            flow, flow_signal = smart_money(stock)
-            opt, opt_signal = options_flow(stock)
-            sent, sent_signal = sentiment(stock)
+            flow, flow_sig = smart_money(stock)
+            opt, opt_sig = options_flow(stock)
+            sent, sent_sig = sentiment(stock)
 
-            ai = ai_score(tech, flow, sent, opt)
             total = tech + flow + sent + opt
+            ai = ai_score(tech, flow, sent, opt)
 
-            results.append((stock, sector, total, tech, flow, sent, opt, ai, flow_signal, sent_signal, opt_signal))
+            results.append((stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig))
 
     results.sort(key=lambda x: x[7], reverse=True)
 
-    crash = crash_detector(results)
+    no_trade = no_trade_day(results)
 
-    msg = "🚨 FULL ALPHA SCAN (AI V2 + OPTIONS FLOW)\n\n"
+    msg = "🚨 FULL ALPHA SCAN (AI V2)\n\n"
 
-    if crash:
-        msg += "⚠️ MARKET WARNING: Weak conditions\n\n"
+    if no_trade:
+        msg += "🚫 NO TRADE DAY DETECTED\n"
+        msg += "Market weak — no strong setups\n"
+        msg += "Best move: Stay patient 🎯\n\n"
 
     msg += "🔥 TOP PLAYS:\n\n"
 
     for r in results[:8]:
-        stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig = r
+        stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os = r
 
         msg += (
             f"{stock} ({sector})\n"
@@ -164,12 +176,12 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Flow: {flow}/5\n"
             f"Options: {opt}/5\n"
             f"Sentiment: {sent}/5\n\n"
-            f"{flow_sig}\n{opt_sig}\n{sent_sig}\n\n"
+            f"{fs}\n{os}\n{ss}\n\n"
         )
 
     await update.message.reply_text(msg)
 
-# -------- ALERT SYSTEM --------
+# -------- ALERTS --------
 async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
     alerts = []
 
@@ -183,7 +195,7 @@ async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
             ai = ai_score(tech, flow, sent, opt)
 
             if ai >= 3.5 or flow >= 4 or opt >= 4:
-                alerts.append((stock, sector, ai, tech, flow, opt, sent))
+                alerts.append((stock, sector, ai))
 
     if not alerts:
         return
@@ -193,19 +205,13 @@ async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
     msg = "🚨 HIGH-CONVICTION SIGNALS\n\n"
 
     for a in alerts:
-        stock, sector, ai, tech, flow, opt, sent = a
-
-        msg += (
-            f"{stock} ({sector})\n"
-            f"AI Score: {ai}\n"
-            f"T:{tech} F:{flow} O:{opt} S:{sent}\n\n"
-        )
+        msg += f"{a[0]} ({a[1]}) | AI Score: {a[2]}\n"
 
     await context.bot.send_message(chat_id=CHAT_ID, text=msg)
 
 # -------- START --------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Alpha Scanner AI V2 + Options Online 🚀")
+    await update.message.reply_text("Alpha Scanner Ready 🚀")
 
 app = ApplicationBuilder().token(TOKEN).build()
 
