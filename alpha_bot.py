@@ -18,7 +18,7 @@ stocks = {
     "Defense": ["LMT","RTX","NOC","GD","BA","PLTR","HII","LHX"],
     "Space": ["RKLB","SPCE","ASTS","IRDM","MAXR"],
     "Energy": ["XOM","CVX","SLB","NEE","COP","EOG","OXY","BP"],
-    "Biotech": ["MRNA","BNTX","VRTX","CRSP","REGN","GILD","AMGN","ILMN","BIIB"]
+    "Biotech": ["MRNA","BNTX","VRTX","CRSP","REGN","GILD","AMGN","ILMN","BIIB"],
     "Quantum": ["IONQ","QBTS","RGTI","IBM","GOOGL","MSFT","AMZN"]
 }
 
