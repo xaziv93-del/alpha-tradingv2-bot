@@ -11,13 +11,14 @@ FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 CHAT_ID = 8655837636
 FLOW_FILE = "flow_data.json"
 
+# -------- EXPANDED STOCK UNIVERSE (~60) --------
 stocks = {
-    "AI": ["NVDA", "AMD", "MSFT", "GOOGL", "AMZN", "SMCI"],
-    "Semiconductors": ["TSM", "ASML", "AVGO", "MU", "INTC"],
-    "Defense": ["LMT", "RTX", "NOC", "GD"],
-    "Space": ["RKLB", "SPCE"],
-    "Energy": ["XOM", "CVX", "SLB", "NEE"],
-    "Biotech": ["MRNA", "BNTX", "VRTX", "CRSP"]
+    "AI": ["NVDA","AMD","MSFT","GOOGL","AMZN","SMCI","META","ORCL","ADBE","CRM"],
+    "Semiconductors": ["TSM","ASML","AVGO","MU","INTC","QCOM","TXN","LRCX","KLAC","AMAT"],
+    "Defense": ["LMT","RTX","NOC","GD","BA","PLTR","HII","LHX"],
+    "Space": ["RKLB","SPCE","ASTS","IRDM","MAXR"],
+    "Energy": ["XOM","CVX","SLB","NEE","COP","EOG","OXY","BP"],
+    "Biotech": ["MRNA","BNTX","VRTX","CRSP","REGN","GILD","AMGN","ILMN","BIIB"]
 }
 
 # -------- FLOW MEMORY --------
@@ -120,6 +121,15 @@ def options_flow(symbol):
 
     return min(score, 5), signal
 
+# -------- COMBO SIGNAL (NEW) --------
+def combo_signal(flow, flow_change, opt):
+    if ("🚀" in flow_change or "📈" in flow_change) and opt >= 3:
+        return "🚀💰 Institutional Activity Detected"
+    elif opt >= 4 and flow >= 3:
+        return "💰 Strong Options + Flow"
+    else:
+        return ""
+
 # -------- SENTIMENT --------
 def sentiment(symbol):
     try:
@@ -128,9 +138,9 @@ def sentiment(symbol):
 
         score = 0
         hype_words = [
-            "surge", "rally", "soars", "breakout",
-            "beats", "bullish", "upgrade", "strong",
-            "explosive", "record", "momentum"
+            "surge","rally","soars","breakout",
+            "beats","bullish","upgrade","strong",
+            "explosive","record","momentum"
         ]
 
         for article in news[:20]:
@@ -200,12 +210,13 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             sent, sent_sig = sentiment(stock)
 
             flow_change = flow_change_signal(stock, flow, prev_data)
+            combo = combo_signal(flow, flow_change, opt)
 
             total = tech + flow + sent + opt
             ai = ai_score(tech, flow, sent, opt)
 
             results.append(
-                (stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig, flow_change)
+                (stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig, flow_change, combo)
             )
 
             new_data[stock] = flow
@@ -219,13 +230,12 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = "🚨 FULL ALPHA SCAN (FLOW INTELLIGENCE MODE)\n\n"
 
     if no_trade:
-        msg += "🚫 NO TRADE DAY DETECTED\n"
-        msg += "Market weak — stay patient 🎯\n\n"
+        msg += "🚫 NO TRADE DAY DETECTED\nMarket weak — stay patient 🎯\n\n"
 
     msg += "🔥 TOP PLAYS:\n\n"
 
     for r in results[:8]:
-        stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os, fc = r
+        stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os, fc, combo = r
 
         msg += (
             f"{stock} ({sector})\n"
@@ -234,7 +244,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Flow: {flow}/5\n"
             f"Options: {opt}/5\n"
             f"Sentiment: {sent}/5\n\n"
-            f"{fs}\n{fc}\n{os}\n{ss}\n\n"
+            f"{fs}\n{fc}\n{os}\n{ss}\n{combo}\n\n"
         )
 
     await update.message.reply_text(msg)
