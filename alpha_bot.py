@@ -3,11 +3,13 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import os
 import requests
 from datetime import time
+import json
 
 TOKEN = os.getenv("BOT_TOKEN")
 FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 
 CHAT_ID = 8655837636
+FLOW_FILE = "flow_data.json"
 
 stocks = {
     "AI": ["NVDA", "AMD", "MSFT", "GOOGL", "AMZN", "SMCI"],
@@ -17,6 +19,18 @@ stocks = {
     "Energy": ["XOM", "CVX", "SLB", "NEE"],
     "Biotech": ["MRNA", "BNTX", "VRTX", "CRSP"]
 }
+
+# -------- FLOW MEMORY --------
+def load_flow_data():
+    try:
+        with open(FLOW_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_flow_data(data):
+    with open(FLOW_FILE, "w") as f:
+        json.dump(data, f)
 
 # -------- DATA --------
 def get_price(symbol):
@@ -67,6 +81,20 @@ def smart_money(symbol):
 
     return min(score, 5), signal
 
+# -------- FLOW CHANGE --------
+def flow_change_signal(symbol, current_flow, prev_data):
+    prev_flow = prev_data.get(symbol, 0)
+    change = current_flow - prev_flow
+
+    if change >= 2:
+        return "🚀 Flow Surge"
+    elif change == 1:
+        return "📈 Increasing Flow"
+    elif change == 0:
+        return "😐 Stable Flow"
+    else:
+        return "⚠️ Decreasing Flow"
+
 # -------- OPTIONS FLOW --------
 def options_flow(symbol):
     data = get_price(symbol)
@@ -99,7 +127,6 @@ def sentiment(symbol):
         news = requests.get(url).json()
 
         score = 0
-
         hype_words = [
             "surge", "rally", "soars", "breakout",
             "beats", "bullish", "upgrade", "strong",
@@ -111,12 +138,10 @@ def sentiment(symbol):
 
             if symbol.lower() in headline:
                 score += 1
-
                 for word in hype_words:
                     if word in headline:
-                        score += 1  # bonus hype
+                        score += 1
 
-        # cap score
         score = min(score, 5)
 
         if score >= 4:
@@ -153,14 +178,18 @@ def no_trade_day(results):
         if r[4] >= 3 and r[6] >= 3 and r[2] >= 10
     ]
 
-    cond1 = low_scores > total * 0.6
-    cond2 = weak_flow > total * 0.6
-    cond3 = len(strong) == 0
-
-    return cond1 and cond2 and cond3
+    return (
+        low_scores > total * 0.6 and
+        weak_flow > total * 0.6 and
+        len(strong) == 0
+    )
 
 # -------- SCAN --------
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    prev_data = load_flow_data()
+    new_data = {}
+
     results = []
 
     for sector, tickers in stocks.items():
@@ -170,26 +199,33 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             opt, opt_sig = options_flow(stock)
             sent, sent_sig = sentiment(stock)
 
+            flow_change = flow_change_signal(stock, flow, prev_data)
+
             total = tech + flow + sent + opt
             ai = ai_score(tech, flow, sent, opt)
 
-            results.append((stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig))
+            results.append(
+                (stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig, flow_change)
+            )
+
+            new_data[stock] = flow
+
+    save_flow_data(new_data)
 
     results.sort(key=lambda x: x[7], reverse=True)
 
     no_trade = no_trade_day(results)
 
-    msg = "🚨 FULL ALPHA SCAN (AI V2)\n\n"
+    msg = "🚨 FULL ALPHA SCAN (FLOW INTELLIGENCE MODE)\n\n"
 
     if no_trade:
         msg += "🚫 NO TRADE DAY DETECTED\n"
-        msg += "Market weak — no strong setups\n"
-        msg += "Best move: Stay patient 🎯\n\n"
+        msg += "Market weak — stay patient 🎯\n\n"
 
     msg += "🔥 TOP PLAYS:\n\n"
 
     for r in results[:8]:
-        stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os = r
+        stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os, fc = r
 
         msg += (
             f"{stock} ({sector})\n"
@@ -198,7 +234,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Flow: {flow}/5\n"
             f"Options: {opt}/5\n"
             f"Sentiment: {sent}/5\n\n"
-            f"{fs}\n{os}\n{ss}\n\n"
+            f"{fs}\n{fc}\n{os}\n{ss}\n\n"
         )
 
     await update.message.reply_text(msg)
