@@ -291,15 +291,18 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for r in results[:8]:
         stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os, fc, combo, early_vol, persist_sig = r
 
-        msg += (
-            f"{stock} ({sector})\n"
-            f"AI Score: {ai} | Total: {total}/20\n\n"
-            f"Technical: {tech}/5\n"
-            f"Flow: {flow}/5\n"
-            f"Options: {opt}/5\n"
-            f"Sentiment: {sent}/5\n\n"
-            f"{fs}\n{fc}\n{os}\n{ss}\n{combo}\n{early_vol}\n{persist_sig}\n\n"
-        )
+        signals = [fs, fc, os, ss, combo, early_vol, persist_sig]
+signals = [s for s in signals if s]
+
+msg += (
+    f"{stock} ({sector})\n"
+    f"AI Score: {ai} | Total: {total}/20\n\n"
+    f"Technical: {tech}/5\n"
+    f"Flow: {flow}/5\n"
+    f"Options: {opt}/5\n"
+    f"Sentiment: {sent}/5\n\n"
+    + "\n".join(signals) + "\n\n"
+)
 
     await update.message.reply_text(msg)
 
