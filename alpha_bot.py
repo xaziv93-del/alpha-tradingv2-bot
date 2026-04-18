@@ -222,6 +222,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             flow_change = flow_change_signal(stock, flow, prev_data)
             combo = combo_signal(flow, flow_change, opt)
+            early_vol = early_volatility_signal(flow, flow_change, opt, sent)
 
             total = tech + flow + sent + opt
             ai = ai_score(tech, flow, sent, opt)
