@@ -15,8 +15,6 @@ REDIS = Redis(
 )
 
 CHAT_ID = 8655837636
-FLOW_FILE = "flow_data.json"
-PERSISTENCE_FILE = "persistence.json"
 
 # -------- EXPANDED STOCK UNIVERSE (~60) --------
 stocks = {
