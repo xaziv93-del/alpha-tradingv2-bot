@@ -31,15 +31,11 @@ stocks = {
 
 # -------- FLOW MEMORY --------
 def load_flow_data():
-    try:
-        with open(FLOW_FILE, "r") as f:
-            return json.load(f)
-    except:
-        return {}
+    data = REDIS.get("flow_data")
+    return data if data else {}
 
 def save_flow_data(data):
-    with open(FLOW_FILE, "w") as f:
-        json.dump(data, f)
+    REDIS.set("flow_data", data)
 
 # -------- PERSISTENCE MEMORY --------
 def load_persistence():
