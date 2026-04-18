@@ -228,7 +228,8 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ai = ai_score(tech, flow, sent, opt)
 
             results.append(
-                (stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig, flow_change, combo)
+            (stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig, flow_change, combo, early_vol)
+
             )
 
             new_data[stock] = flow
