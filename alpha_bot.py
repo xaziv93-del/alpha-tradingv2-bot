@@ -257,7 +257,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Flow: {flow}/5\n"
             f"Options: {opt}/5\n"
             f"Sentiment: {sent}/5\n\n"
-            f"{fs}\n{fc}\n{os}\n{ss}\n{combo}\n\n"
+            f"{fs}\n{fc}\n{os}\n{ss}\n{combo}\n{early_vol}\n\n"
         )
 
     await update.message.reply_text(msg)
