@@ -263,14 +263,15 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ai = ai_score(tech, flow, sent, opt)
 
             results.append(
-            (stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig, flow_change, combo, early_vol)
-
+            (stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig, flow_change, combo, early_vol, persist_sig)
+            
             )
 
             new_data[stock] = flow
 
     save_flow_data(new_data)
-
+    save_persistence(persist_new)
+    
     results.sort(key=lambda x: x[7], reverse=True)
 
     no_trade = no_trade_day(results)
