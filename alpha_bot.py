@@ -46,6 +46,24 @@ def save_persistence(data):
     with open(PERSISTENCE_FILE, "w") as f:
         json.dump(data, f)
 
+# -------- PERSISTENCE ENGINE --------
+def persistence_signal(symbol, early_vol, prev_data):
+    prev_count = prev_data.get(symbol, 0)
+
+    if "⚡" in early_vol:
+        new_count = prev_count + 1
+    else:
+        new_count = 0
+
+    if new_count >= 3:
+        signal = "🔥⚡ Persistent Early Momentum"
+    elif new_count == 2:
+        signal = "👀 Building Pressure"
+    else:
+        signal = ""
+
+    return new_count, signal
+
 # -------- DATA --------
 def get_price(symbol):
     url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
