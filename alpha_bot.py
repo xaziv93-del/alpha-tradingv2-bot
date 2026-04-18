@@ -34,6 +34,18 @@ def save_flow_data(data):
     with open(FLOW_FILE, "w") as f:
         json.dump(data, f)
 
+# -------- PERSISTENCE MEMORY --------
+def load_persistence():
+    try:
+        with open(PERSISTENCE_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_persistence(data):
+    with open(PERSISTENCE_FILE, "w") as f:
+        json.dump(data, f)
+
 # -------- DATA --------
 def get_price(symbol):
     url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
