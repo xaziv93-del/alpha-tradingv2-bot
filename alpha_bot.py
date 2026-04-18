@@ -239,7 +239,10 @@ def no_trade_day(results):
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     prev_data = load_flow_data()
+    persist_prev = load_persistence()
+
     new_data = {}
+    persist_new = {}
 
     results = []
 
