@@ -131,6 +131,16 @@ def combo_signal(flow, flow_change, opt):
     else:
         return ""
 
+# -------- EARLY VOLATILITY --------
+def early_volatility_signal(flow, flow_change, opt, sent):
+    if (
+        ("🚀" in flow_change or "📈" in flow_change)
+        and opt >= 2
+        and sent <= 2
+    ):
+        return "⚡ Early Volatility Detected"
+    return ""
+    
 # -------- SENTIMENT --------
 def sentiment(symbol):
     try:
