@@ -4,9 +4,15 @@ import os
 import requests
 from datetime import time
 import json
+from upstash_redis import Redis
 
 TOKEN = os.getenv("BOT_TOKEN")
 FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
+
+REDIS = Redis(
+    url=os.getenv("REDIS_URL"),
+    token=os.getenv("REDIS_TOKEN"),
+)
 
 CHAT_ID = 8655837636
 FLOW_FILE = "flow_data.json"
