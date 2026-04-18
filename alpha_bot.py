@@ -42,12 +42,10 @@ def load_persistence():
     data = REDIS.get("persistence_data")
     if not data:
         return {}
-    return data if
-isinstance(data, dict) else
-json.loads(data)
+    return data if isinstance(data, dict) else json.loads(data)
 
 def save_persistence(data):
-    REDIS.set("persistence_data", data)
+    REDIS.set("persistence_data", json.dumps(data))
 
 # -------- PERSISTENCE ENGINE --------
 def persistence_signal(symbol, early_vol, prev_data):
