@@ -32,12 +32,10 @@ def load_flow_data():
     data = REDIS.get("flow_data")
     if not data:
         return {}
-    return data if
-isinstance(data, dict) else
-json.loads(data)
+    return data if isinstance(data, dict) else json.loads(data)
 
 def save_flow_data(data):
-    REDIS.set("flow_data", data)
+    REDIS.set("flow_data", json.dumps(data))
 
 # -------- PERSISTENCE MEMORY --------
 def load_persistence():
