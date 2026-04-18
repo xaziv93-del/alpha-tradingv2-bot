@@ -39,15 +39,11 @@ def save_flow_data(data):
 
 # -------- PERSISTENCE MEMORY --------
 def load_persistence():
-    try:
-        with open(PERSISTENCE_FILE, "r") as f:
-            return json.load(f)
-    except:
-        return {}
+    data = REDIS.get("persistence_data")
+    return data if data else {}
 
 def save_persistence(data):
-    with open(PERSISTENCE_FILE, "w") as f:
-        json.dump(data, f)
+    REDIS.set("persistence_data", data)
 
 # -------- PERSISTENCE ENGINE --------
 def persistence_signal(symbol, early_vol, prev_data):
