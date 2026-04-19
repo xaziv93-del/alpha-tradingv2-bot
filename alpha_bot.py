@@ -284,10 +284,11 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     msg += "🔥 TOP PLAYS:\n\n"
 
-    for r in results[:8]: stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os, fc, combo, early_vol, persist_sig = r
+    for r in results[:8]:
+        stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os, fc, combo, early_vol, persist_sig = r
 
-    signals = [fs, fc, os, ss, combo, early_vol, persist_sig]
-    signals = [s for s in signals if s]
+        signals = [fs, fc, os, ss, combo, early_vol, persist_sig]
+        signals = [s for s in signals if s]
 
     msg += (
         f"{stock} ({sector})\n"
