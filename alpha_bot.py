@@ -322,6 +322,9 @@ async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
 
     for sector, tickers in stocks.items():
         for stock in tickers:
+            if not pre_filter(stocks):
+                continue
+            
             tech = technical_score(stock)
             flow, _ = smart_money(stock)
             opt, _ = options_flow(stock)
