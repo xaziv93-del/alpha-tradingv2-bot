@@ -71,6 +71,19 @@ def get_price(symbol):
     url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
     return requests.get(url).json()
 
+def pre_filter(symbol):
+    data = get_price(symbol)
+    c = data.get("c")
+    pc = data.get("pc")
+
+    if not c or not pc:
+        return False
+
+    change = abs((c - pc) / pc)
+
+    # Only allow stocks moving at least 2%
+    return change > 0.02
+
 # -------- TECH --------
 def technical_score(symbol):
     data = get_price(symbol)
