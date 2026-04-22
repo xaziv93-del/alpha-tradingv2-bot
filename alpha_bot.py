@@ -340,6 +340,9 @@ app = ApplicationBuilder().token(TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("scan", scan))
 
-app.job_queue.run_daily(auto_scan, time=time(hour=14, minute=0, tzinfo=pytz.timezone("Europe/Stockholm"))
+app.job_queue.run_daily(
+    auto_scan,
+    time=time(hour=14, minute=0, tzinfo=pytz.timezone("Europe/Stockholm"))
+)
 
 app.run_polling()
