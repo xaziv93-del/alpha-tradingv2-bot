@@ -3,6 +3,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import os
 import requests
 from datetime import time
+import pytz
 import json
 from upstash_redis import Redis
 
@@ -339,6 +340,6 @@ app = ApplicationBuilder().token(TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("scan", scan))
 
-app.job_queue.run_daily(auto_scan, time=time(hour=12, minute=0))
+app.job_queue.run_daily(auto_scan, time=time(hour=14, minute=0, tzinfo=pytz.timezone("Europe/Stockholm"))
 
 app.run_polling()
