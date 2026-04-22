@@ -223,14 +223,17 @@ def sentiment(symbol):
         return 0, "Error"
 
 # -------- AI SCORE --------
-def ai_score(tech, flow, sent, opt):
-    return round(
+def ai_score(tech, flow, sent, opt, persist_count):
+    base = (
         tech * 0.25 +
         flow * 0.35 +
         opt * 0.25 +
-        sent * 0.15,
-        2
+        sent * 0.15
     )
+
+    bonus = persist_count * 0.3  # reward persistence
+
+    return round(base + bonus, 2)
 
 # -------- NO TRADE DAY --------
 def no_trade_day(results):
