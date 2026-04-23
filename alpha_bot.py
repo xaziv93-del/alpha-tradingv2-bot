@@ -17,15 +17,19 @@ REDIS = Redis(
 
 CHAT_ID = 8655837636
 
-# -------- EXPANDED STOCK UNIVERSE (~60) --------
+# -------- EXPANDED STOCK UNIVERSE (~150) --------
 stocks = {
-    "AI": ["NVDA","AMD","MSFT","GOOGL","AMZN","SMCI","META","ORCL","ADBE","CRM"],
-    "Semiconductors": ["TSM","ASML","AVGO","MU","INTC","QCOM","TXN","LRCX","KLAC","AMAT"],
-    "Defense": ["LMT","RTX","NOC","GD","BA","PLTR","HII","LHX"],
-    "Space": ["RKLB","SPCE","ASTS","IRDM","MAXR"],
-    "Energy": ["XOM","CVX","SLB","NEE","COP","EOG","OXY","BP"],
-    "Biotech": ["MRNA","BNTX","VRTX","CRSP","REGN","GILD","AMGN","ILMN","BIIB"],
-    "Quantum": ["IONQ","QBTS","RGTI","IBM","GOOGL","MSFT","AMZN"]
+
+    "AI": ["NVDA","AMD","MSFT","GOOGL","AMZN","META","ORCL","ADBE","CRM","SMCI","SNOW","PLTR"], 
+    "Semiconductors": ["TSM","ASML","AVGO","MU","INTC","QCOM","TXN","LRCX","KLAC","AMAT","ON","MCHP"],
+    "Defense": ["LMT","RTX","NOC","GD","BA","PLTR","HII","LHX","KTOS","AVAV"],
+    "Space": ["RKLB","SPCE","ASTS","IRDM","SATL","VSAT"],
+    "Energy": ["XOM","CVX","SLB","COP","EOG","OXY","BP","HAL","DVN","FANG"],
+    "Biotech": ["MRNA","BNTX","VRTX","CRSP","REGN","GILD","AMGN","ILMN","BIIB","SGEN"],
+    "Quantum": ["IONQ","QBTS","RGTI","IBM","GOOGL","MSFT","AMZN"],
+    "Momentum": ["TSLA","COIN","MSTR","RBLX","SHOP","SQ","ROKU","AFRM","UPST","DKNG"],
+    "Finance": ["JPM","GS","MS","BAC","C","SCHW","PYPL","V","MA"],
+    "ETF": ["SPY","QQQ","IWM","SMH","XLE","XLK","ARKK"]
 }
 
 # -------- FLOW MEMORY --------
