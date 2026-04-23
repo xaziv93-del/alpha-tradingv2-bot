@@ -297,11 +297,11 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     results = []
 
     for sector, tickers in stocks.items():
-    for stock in tickers:
+        for stock in tickers:
 
         # 🔪 PRE-FILTER
-        if not pre_filter(stock):
-            continue
+            if not pre_filter(stock):
+                continue
             
             tech = technical_score(stock)
             flow, flow_sig = smart_money(stock)
