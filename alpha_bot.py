@@ -351,9 +351,11 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         sector_scores[sector].append(ai)
 
-    sector_avg = {
-        s: round(sum(vals) / len(vals), 2)
-        for s, vals in sector_scores.items()
+    max_score = max(sum(vals)/len(vals) for vals in sector_scores.values())
+
+sector_avg = {
+    s: round((sum(vals)/len(vals) / max_score) * 5, 2)
+    for s, vals in sector_scores.items()
 }
 
     save_flow_data(new_data)
