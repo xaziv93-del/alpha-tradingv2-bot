@@ -369,7 +369,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     top_sectors = sorted(sector_avg.items(), key=lambda x: x[1], reverse=True)
 
     for s, score in top_sectors[:5]:
-    msg += f"{s}: {score}\n"
+        msg += f"{s}: {score}\n"
 
     msg += "\n"
 
