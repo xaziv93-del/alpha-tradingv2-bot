@@ -73,8 +73,6 @@ def persistence_signal(symbol, early_vol, prev_data):
     return new_count, signal
 
 # -------- DATA --------
-import time as t
-
 def get_price(symbol):
     if symbol in price_cache:
         return price_cache[symbol]
@@ -308,7 +306,7 @@ def pre_filter(stock):
 
 # -------- SCAN --------
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
+    price_cache.clear()
     prev_data = load_flow_data()
     persist_prev = load_persistence()
 
