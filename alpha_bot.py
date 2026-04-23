@@ -84,26 +84,6 @@ def get_price(symbol):
     price_cache[symbol] = data
     return data
 
-def pre_filter(symbol):
-    data = get_price(symbol)
-
-    c = data.get("c")
-    pc = data.get("pc")
-
-    if not c or not pc:
-        return False
-
-    change = abs((c - pc) / pc)
-
-    # 🔥 RULES
-    if change < 0.01:
-        return False  # no movement
-
-    if c < 5:
-        return False  # avoid junk stocks
-
-    return True
-
 # -------- TECH --------
 def technical_score(symbol):
     data = get_price(symbol)
@@ -294,16 +274,29 @@ def no_trade_day(results):
     )
 
 def pre_filter(stock):
+    data = get_price(stock)
+    c = data.get("c")
+    pc = data.get("pc")
+
+    if not c or not pc:
+        return False
+
+    change = abs((c - pc) / pc)
+
     tech = technical_score(stock)
     flow, _ = smart_money(stock)
 
-    # 🔪 Kill dead stocks early
-    if tech <= 1 and flow <= 1:
+    # 🔥 HARD FILTER
+    if c < 5:
         return False
 
-    # ❌ No movement at all
-    if tech == 0 and flow == 0:
-        return False
+    # 💤 DEAD MARKET
+    if change < 0.005:
+        return tech >= 2 or flow >= 2
+
+    # 🚀 ACTIVE MARKET
+    if change >= 0.005:
+        return tech >= 1 or flow >= 1
 
     return True
 
