@@ -271,6 +271,20 @@ def no_trade_day(results):
         len(strong) == 0
     )
 
+def pre_filter(stock):
+    tech = technical_score(stock)
+    flow, _ = smart_money(stock)
+
+    # 🔪 Kill dead stocks early
+    if tech <= 1 and flow <= 1:
+        return False
+
+    # ❌ No movement at all
+    if tech == 0 and flow == 0:
+        return False
+
+    return True
+
 # -------- SCAN --------
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
