@@ -209,9 +209,11 @@ def early_volatility_signal(flow, flow_change, opt, sent):
 # -------- SENTIMENT --------
 def sentiment(symbol):
     try:
-        url = f"https://finnhub.io/api/v1/news?category=general&token={FINNHUB_API_KEY}"
-        news = requests.get(url).json()
-
+        global news_cache
+        if news_cache is None:
+            url = f"https://finnhub.io/api/v1/news?category=general&token={FINNHUB_API_KEY}"
+            news_cache = requests.get(url).json()
+            news = news_cache
         score = 0
         hype_words = [
             "surge","rally","soars","breakout",
