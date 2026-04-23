@@ -71,9 +71,13 @@ def persistence_signal(symbol, early_vol, prev_data):
     return new_count, signal
 
 # -------- DATA --------
+import time as t
+
 def get_price(symbol):
     url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
-    return requests.get(url).json()
+    response = requests.get(url)
+    t.sleep(0.2)  # 🧠 prevents rate limit
+    return response.json()
 
 def pre_filter(symbol):
     data = get_price(symbol)
