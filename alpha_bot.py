@@ -296,7 +296,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             persist_new[stock] = persist_count
             
             total = tech + flow + sent + opt
-            ai = ai_score(tech, flow, sent, opt, persist_count)
+            ai = ai_score_v3(tech, flow, sent, opt, early_vol, persist_count)
 
             results.append(
             (stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig, flow_change, combo, early_vol, persist_sig)
