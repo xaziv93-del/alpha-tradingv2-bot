@@ -81,6 +81,7 @@ def get_price(symbol):
 
 def pre_filter(symbol):
     data = get_price(symbol)
+
     c = data.get("c")
     pc = data.get("pc")
 
@@ -89,8 +90,14 @@ def pre_filter(symbol):
 
     change = abs((c - pc) / pc)
 
-    # Only allow stocks moving at least 2%
-    return change > 0.02
+    # 🔥 RULES
+    if change < 0.01:
+        return False  # no movement
+
+    if c < 5:
+        return False  # avoid junk stocks
+
+    return True
 
 # -------- TECH --------
 def technical_score(symbol):
