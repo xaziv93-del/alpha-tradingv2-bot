@@ -18,6 +18,7 @@ REDIS = Redis(
 CHAT_ID = 8655837636
 
 price_cache = {}
+news_cache = None
 
 # -------- EXPANDED STOCK UNIVERSE (~150) --------
 stocks = {
