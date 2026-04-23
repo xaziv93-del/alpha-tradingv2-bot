@@ -358,17 +358,17 @@ sector_avg = {
     for s, vals in sector_scores.items()
 }
 
-save_flow_data(new_data)
-save_persistence(persist_new)
+    save_flow_data(new_data)
+    save_persistence(persist_new)
     
-results.sort(key=lambda x: x[7], reverse=True)
+    results.sort(key=lambda x: x[7], reverse=True)
 
-no_trade = no_trade_day(results)
+    no_trade = no_trade_day(results)
 
-msg = "🚨 FULL ALPHA SCAN (FLOW INTELLIGENCE MODE)\n\n"
-msg += "📊 SECTOR STRENGTH:\n\n"
+    msg = "🚨 FULL ALPHA SCAN (FLOW INTELLIGENCE MODE)\n\n"
+    msg += "📊 SECTOR STRENGTH:\n\n"
 
-top_sectors = sorted(sector_avg.items(), key=lambda x: x[1], reverse=True)
+    top_sectors = sorted(sector_avg.items(), key=lambda x: x[1], reverse=True)
 
     for s, score in top_sectors[:5]:
         msg += f"{s}: {score}\n"
