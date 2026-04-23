@@ -223,17 +223,35 @@ def sentiment(symbol):
         return 0, "Error"
 
 # -------- AI SCORE --------
-def ai_score(tech, flow, sent, opt, persist_count):
-    base = (
-        tech * 0.25 +
-        flow * 0.35 +
-        opt * 0.25 +
-        sent * 0.15
+def ai_score_v3(tech, flow, sent, opt, early_vol, persist_count):
+    score = (
+        tech * 0.2 +
+        flow * 0.3 +
+        opt * 0.2 +
+        sent * 0.1
     )
 
-    bonus = persist_count * 0.3  # reward persistence
+    # ⚡ Early volatility boost
+    if "⚡" in early_vol:
+        score += 0.5
 
-    return round(base + bonus, 2)
+    # 🔁 Persistence boost
+    if persist_count >= 3:
+        score += 1.5
+    elif persist_count == 2:
+        score += 1
+    elif persist_count == 1:
+        score += 0.3
+
+    # 🚀 Flow expansion bonus
+    if flow >= 4:
+        score += 0.5
+
+    # ⚠️ Weak flow penalty
+    if flow <= 1:
+        score -= 0.5
+
+    return round(score, 2)
 
 # -------- NO TRADE DAY --------
 def no_trade_day(results):
