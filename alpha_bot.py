@@ -339,6 +339,23 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             new_data[stock] = flow
 
+    # -------- SECTOR STRENGTH --------
+    sector_scores = {}
+
+    for r in results:
+        sector = r[1]
+        ai = r[7]
+
+        if sector not in sector_scores:
+            sector_scores[sector] = []
+
+        sector_scores[sector].append(ai)
+
+    sector_avg = {
+        s: round(sum(vals) / len(vals), 2)
+        for s, vals in sector_scores.items()
+}
+
     save_flow_data(new_data)
     save_persistence(persist_new)
     
