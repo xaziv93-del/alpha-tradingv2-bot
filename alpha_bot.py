@@ -358,7 +358,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if no_trade:
         msg += "🚫 NO TRADE DAY DETECTED\nMarket weak — stay patient 🎯\n\n"
 
-    msg += "🔥 TOP PLAYS:\n\n"
+        msg += "🔥 TOP PLAYS:\n\n"
 
     for r in results[:8]:
         stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os, fc, combo, early_vol, persist_sig = r
@@ -366,7 +366,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
         signals = [fs, fc, os, ss, combo, early_vol, persist_sig]
         signals = [s for s in signals if s]
 
-    msg += (
+        msg += (
         f"{stock} ({sector})\n"
         f"AI Score: {ai} | Total: {total}/20\n\n"
         f"Technical: {tech}/5\n"
