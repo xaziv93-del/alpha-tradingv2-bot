@@ -213,7 +213,7 @@ def sentiment(symbol):
         if news_cache is None:
             url = f"https://finnhub.io/api/v1/news?category=general&token={FINNHUB_API_KEY}"
             news_cache = requests.get(url).json()
-            news = news_cache
+    news = news_cache
         score = 0
         hype_words = [
             "surge","rally","soars","breakout",
