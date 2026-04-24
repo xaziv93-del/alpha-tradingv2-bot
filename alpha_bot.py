@@ -308,16 +308,15 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     new_data = {}
     persist_new = {}
-
     results = []
 
     for sector, tickers in stocks.items():
         for stock in tickers:
 
-        # 🔪 PRE-FILTER
+            # 🔪 PRE-FILTER
             if not pre_filter(stock):
                 continue
-            
+
             tech = technical_score(stock)
             flow, flow_sig = smart_money(stock)
             opt, opt_sig = options_flow(stock)
@@ -326,15 +325,17 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             flow_change = flow_change_signal(stock, flow, prev_data)
             combo = combo_signal(flow, flow_change, opt)
             early_vol = early_volatility_signal(flow, flow_change, opt, sent)
+
             persist_count, persist_sig = persistence_signal(stock, early_vol, persist_prev)
             persist_new[stock] = persist_count
-            
+
             total = tech + flow + sent + opt
             ai = ai_score_v3(tech, flow, sent, opt, early_vol, persist_count)
 
             results.append(
-            (stock, sector, total, tech, flow, sent, opt, ai, flow_sig, sent_sig, opt_sig, flow_change, combo, early_vol, persist_sig)
-            
+                (stock, sector, total, tech, flow, sent, opt, ai,
+                 flow_sig, sent_sig, opt_sig, flow_change,
+                 combo, early_vol, persist_sig)
             )
 
             new_data[stock] = flow
@@ -351,23 +352,27 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         sector_scores[sector].append(ai)
 
+    # normalize sectors
     max_score = max(sum(vals)/len(vals) for vals in sector_scores.values())
 
-sector_avg = {
-    s: round((sum(vals)/len(vals) / max_score) * 5, 2)
-    for s, vals in sector_scores.items()
-}
+    sector_avg = {
+        s: round((sum(vals)/len(vals)) / max_score, 2)
+        for s, vals in sector_scores.items()
+    }
 
+    # -------- SAVE MEMORY --------
     save_flow_data(new_data)
     save_persistence(persist_new)
-    
-    results.sort(key=lambda x: x[7], reverse=True)
 
+    # -------- SORT --------
+    results.sort(key=lambda x: x[7], reverse=True)
     no_trade = no_trade_day(results)
 
+    # -------- BUILD MESSAGE --------
     msg = "🚨 FULL ALPHA SCAN (FLOW INTELLIGENCE MODE)\n\n"
-    msg += "📊 SECTOR STRENGTH:\n\n"
 
+    # 📊 Sector strength
+    msg += "📊 SECTOR STRENGTH:\n\n"
     top_sectors = sorted(sector_avg.items(), key=lambda x: x[1], reverse=True)
 
     for s, score in top_sectors[:5]:
@@ -375,11 +380,13 @@ sector_avg = {
 
     msg += "\n"
 
+    # 🚫 No trade filter
     if no_trade:
         msg += "🚫 NO TRADE DAY DETECTED\nMarket weak — stay patient 🎯\n\n"
 
-        msg += "🔥 TOP PLAYS:\n\n"
+    msg += "🔥 TOP PLAYS:\n\n"
 
+    # -------- TOP STOCKS --------
     for r in results[:8]:
         stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os, fc, combo, early_vol, persist_sig = r
 
@@ -387,16 +394,17 @@ sector_avg = {
         signals = [s for s in signals if s]
 
         msg += (
-        f"{stock} ({sector})\n"
-        f"AI Score: {ai} | Total: {total}/20\n\n"
-        f"Technical: {tech}/5\n"
-        f"Flow: {flow}/5\n"
-        f"Options: {opt}/5\n"
-        f"Sentiment: {sent}/5\n\n"
-        + "\n".join(signals) + "\n\n"
-    )
+            f"{stock} ({sector})\n"
+            f"AI Score: {ai} | Total: {total}/20\n\n"
+            f"Technical: {tech}/5\n"
+            f"Flow: {flow}/5\n"
+            f"Options: {opt}/5\n"
+            f"Sentiment: {sent}/5\n\n"
+            + "\n".join(signals) + "\n\n"
+        )
 
     await update.message.reply_text(msg)
+
 
 # -------- ALERTS --------
 async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
