@@ -190,36 +190,72 @@ def early_volatility_signal(flow, flow_change, opt, sent):
 def sentiment(symbol):
     try:
         global news_cache
+
         if news_cache is None:
             url = f"https://finnhub.io/api/v1/news?category=general&token={FINNHUB_API_KEY}"
             news_cache = requests.get(url).json()
+
         news = news_cache
+
         score = 0
-        hype_words = [
-            "surge","rally","soars","breakout",
-            "beats","bullish","upgrade","strong",
-            "explosive","record","momentum"
+        mentions = 0
+
+        positive_words = [
+            "surge","rally","soars","breakout","beats",
+            "bullish","upgrade","strong","record","momentum",
+            "growth","expansion","outperform"
         ]
 
-        for article in news[:20]:
+        negative_words = [
+            "drop","falls","miss","downgrade","weak",
+            "lawsuit","risk","decline","cut","bearish",
+            "loss","warning"
+        ]
+
+        for article in news[:30]:
             headline = article.get("headline", "").lower()
+            summary = article.get("summary", "").lower()
 
-            if symbol.lower() in headline:
-                score += 1
-                for word in hype_words:
-                    if word in headline:
-                        score += 1
+            text = headline + " " + summary
 
-        score = min(score, 5)
+            # 🎯 RELEVANCE FILTER (strong upgrade)
+            if symbol.lower() not in text:
+                continue
 
-        if score >= 4:
-            signal = "🔥 Viral Hype Building"
-        elif score >= 2:
-            signal = "📢 Social Attention Rising"
+            mentions += 1
+
+            for word in positive_words:
+                if word in text:
+                    score += 1
+
+            for word in negative_words:
+                if word in text:
+                    score -= 1
+
+        # 🧠 Normalize score
+        if mentions == 0:
+            return 0, "😐 No Coverage"
+
+        norm_score = score / mentions
+
+        # 🎯 FINAL SIGNAL
+        if norm_score >= 1:
+            signal = "🔥 Strong Bullish Sentiment"
+            final_score = 5
+        elif norm_score >= 0.3:
+            signal = "📈 Bullish Bias"
+            final_score = 3
+        elif norm_score <= -1:
+            signal = "💀 Strong Bearish Sentiment"
+            final_score = 0
+        elif norm_score <= -0.3:
+            signal = "📉 Bearish Bias"
+            final_score = 1
         else:
-            signal = "😐 No Hype"
+            signal = "😐 Neutral Sentiment"
+            final_score = 2
 
-        return score, signal
+        return final_score, signal
 
     except:
         return 0, "Error"
