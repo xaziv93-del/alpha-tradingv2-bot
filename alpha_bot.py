@@ -15,7 +15,7 @@ REDIS = Redis(
     token=os.getenv("REDIS_TOKEN"),
 )
 
-MIN_SECTOR_STRENGTH = 0.4
+MIN_SECTOR_STRENGTH = 0.5
 
 CHAT_ID = 8655837636
 
@@ -465,10 +465,17 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # -------- ALERTS --------
 async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
+    global news_cache
+    news_cache = None  # 🔥 reset news each run
+
     prev_alerts = load_alerts()
     new_alerts = {}
 
     alerts = []
+
+    # -------- BUILD TEMP RESULTS + SECTOR STRENGTH --------
+    sector_scores = {}
+    temp_results = []
 
     for sector, tickers in stocks.items():
         for stock in tickers:
@@ -483,25 +490,58 @@ async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
 
             ai = ai_score_v3(tech, flow, sent, opt, "", 0)
 
-            prev_ai = prev_alerts.get(stock, 0)
+            temp_results.append((stock, sector, ai, flow, opt))
 
-            # 🚀 ONLY ALERT ON CHANGE / IMPROVEMENT
-            is_new = False
+            if sector not in sector_scores:
+                sector_scores[sector] = []
 
-            if ai >= 3.5 and prev_ai < 3.5:
-                is_new = True
+            sector_scores[sector].append(ai)
 
-            elif flow >= 4 and prev_ai < 2:
-                is_new = True
+    # -------- NORMALIZE SECTORS --------
+    if not sector_scores:
+        return
 
-            elif opt >= 4 and prev_ai < 2:
-                is_new = True
+    max_score = max(sum(vals)/len(vals) for vals in sector_scores.values())
 
-            if is_new:
-                alerts.append((stock, sector, ai))
+    sector_avg = {
+        s: round((sum(vals)/len(vals)) / max_score, 2)
+        for s, vals in sector_scores.items()
+    }
 
-            new_alerts[stock] = ai
+    STRONG_SECTORS = {
+        s for s, score in sector_avg.items()
+        if score >= MIN_SECTOR_STRENGTH
+    }
 
+    # -------- ALERT LOGIC --------
+    for stock, sector, ai, flow, opt in temp_results:
+
+        # 🔥 SECTOR FILTER
+        if sector not in STRONG_SECTORS:
+            continue
+
+        prev_ai = prev_alerts.get(stock, 0)
+
+        is_new = False
+
+        # 🚀 MAIN TRIGGER
+        if ai >= 3.5 and prev_ai < 3.5:
+            is_new = True
+
+        # 💰 FLOW TRIGGER
+        elif flow >= 4 and prev_ai < 2:
+            is_new = True
+
+        # 💰 OPTIONS TRIGGER
+        elif opt >= 4 and prev_ai < 2:
+            is_new = True
+
+        if is_new:
+            alerts.append((stock, sector, ai))
+
+        new_alerts[stock] = ai
+
+    # -------- SAVE --------
     save_alerts(new_alerts)
 
     if not alerts:
@@ -509,13 +549,13 @@ async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
 
     alerts.sort(key=lambda x: x[2], reverse=True)
 
+    # -------- MESSAGE --------
     msg = "🚨 NEW OPPORTUNITIES DETECTED\n\n"
 
     for stock, sector, ai in alerts:
         msg += f"{stock} ({sector}) | AI Score: {ai}\n"
 
     await context.bot.send_message(chat_id=CHAT_ID, text=msg)
-
 # -------- START --------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Alpha Scanner Ready 🚀")
