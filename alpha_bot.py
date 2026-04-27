@@ -19,7 +19,6 @@ MIN_SECTOR_STRENGTH = 0.4
 
 CHAT_ID = 8655837636
 
-ALERT_CACHE = {}
 price_cache = {}
 news_cache = None
 
