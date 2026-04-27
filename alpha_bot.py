@@ -525,7 +525,7 @@ async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
         is_new = False
 
         # 🚀 MAIN TRIGGER
-        if ai >= 3.5 and prev_ai < 3.5:
+        if ai >= 3.5 and flow >= 3 and opt >= 3 and prev_ai < 3.5:
             is_new = True
 
         # 💰 FLOW TRIGGER
