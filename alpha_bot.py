@@ -15,6 +15,8 @@ REDIS = Redis(
     token=os.getenv("REDIS_TOKEN"),
 )
 
+MIN_SECTOR_STRENGTH = 0.4
+
 CHAT_ID = 8655837636
 
 price_cache = {}
