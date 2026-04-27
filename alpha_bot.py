@@ -453,32 +453,54 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # -------- ALERTS --------
 async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
+    prev_alerts = load_alerts()
+    new_alerts = {}
+
     alerts = []
 
     for sector, tickers in stocks.items():
         for stock in tickers:
-            if not pre_filter(stocks):
+
+            if not pre_filter(stock):
                 continue
-            
+
             tech = technical_score(stock)
             flow, _ = smart_money(stock)
             opt, _ = options_flow(stock)
             sent, _ = sentiment(stock)
 
-            ai = ai_score(tech, flow, sent, opt)
+            ai = ai_score_v3(tech, flow, sent, opt, "", 0)
 
-            if ai >= 3.5 or flow >= 4 or opt >= 4:
+            prev_ai = prev_alerts.get(stock, 0)
+
+            # 🚀 ONLY ALERT ON CHANGE / IMPROVEMENT
+            is_new = False
+
+            if ai >= 3.5 and prev_ai < 3.5:
+                is_new = True
+
+            elif flow >= 4 and prev_ai < 2:
+                is_new = True
+
+            elif opt >= 4 and prev_ai < 2:
+                is_new = True
+
+            if is_new:
                 alerts.append((stock, sector, ai))
+
+            new_alerts[stock] = ai
+
+    save_alerts(new_alerts)
 
     if not alerts:
         return
 
     alerts.sort(key=lambda x: x[2], reverse=True)
 
-    msg = "🚨 HIGH-CONVICTION SIGNALS\n\n"
+    msg = "🚨 NEW OPPORTUNITIES DETECTED\n\n"
 
-    for a in alerts:
-        msg += f"{a[0]} ({a[1]}) | AI Score: {a[2]}\n"
+    for stock, sector, ai in alerts:
+        msg += f"{stock} ({sector}) | AI Score: {ai}\n"
 
     await context.bot.send_message(chat_id=CHAT_ID, text=msg)
 
