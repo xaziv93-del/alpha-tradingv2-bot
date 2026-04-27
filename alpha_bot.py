@@ -405,6 +405,11 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for s, vals in sector_scores.items()
     }
 
+    STRONG_SECTORS = {
+    s for s, score in sector_avg.items()
+    if score >= MIN_SECTOR_STRENGTH
+    }
+    
     # -------- SAVE MEMORY --------
     save_flow_data(new_data)
     save_persistence(persist_new)
