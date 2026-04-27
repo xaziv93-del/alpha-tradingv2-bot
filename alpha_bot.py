@@ -45,6 +45,15 @@ def load_flow_data():
 def save_flow_data(data):
     REDIS.set("flow_data", json.dumps(data))
 
+def load_alerts():
+    data = REDIS.get("alerted_stocks")
+    if not data:
+        return {}
+    return data if isinstance(data, dict) else json.loads(data)
+
+def save_alerts(data):
+    REDIS.set("alerted_stocks", json.dumps(data))
+
 # -------- PERSISTENCE MEMORY --------
 def load_persistence():
     data = REDIS.get("persistence_data")
