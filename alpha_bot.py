@@ -363,6 +363,9 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     prev_data = load_flow_data()
     persist_prev = load_persistence()
 
+    watch_prev = load_watchlist()
+    watch_new = {}
+    
     new_data = {}
     persist_new = {}
     results = []
