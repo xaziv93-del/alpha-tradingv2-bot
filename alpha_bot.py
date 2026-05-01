@@ -412,7 +412,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             results.append(
                 (stock, sector, total, tech, flow, sent, opt, ai,
                  flow_sig, sent_sig, opt_sig, flow_change,
-                 combo, early_vol, persist_sig)
+                 combo, early_vol, persist_sig, watch_sig)
             )
 
             new_data[stock] = flow
