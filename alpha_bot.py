@@ -56,6 +56,16 @@ def load_alerts():
 def save_alerts(data):
     REDIS.set("alerted_stocks", json.dumps(data))
 
+# -------- WATCHLIST MEMORY --------
+def load_watchlist():
+    data = REDIS.get("watchlist_data")
+    if not data:
+        return {}
+    return data if isinstance(data, dict) else json.loads(data)
+
+def save_watchlist(data):
+    REDIS.set("watchlist_data", json.dumps(data))
+
 # -------- PERSISTENCE MEMORY --------
 def load_persistence():
     data = REDIS.get("persistence_data")
