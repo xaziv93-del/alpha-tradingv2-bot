@@ -392,6 +392,23 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             total = tech + flow + sent + opt
             ai = ai_score_v3(tech, flow, sent, opt, early_vol, persist_count)
 
+            prev_watch = watch_prev.get(stock, 0)
+
+            # only count strong setups
+            if ai >= 3.5:
+                watch_count = prev_watch + 1
+            else:
+                watch_count = 0
+
+            if watch_count >= 3:
+                watch_sig = "🔥 Sector Leader"
+            elif watch_count == 2:
+                watch_sig = "👀 Emerging Leader"
+            else:
+                watch_sig = ""
+
+            watch_new[stock] = watch_count
+            
             results.append(
                 (stock, sector, total, tech, flow, sent, opt, ai,
                  flow_sig, sent_sig, opt_sig, flow_change,
