@@ -477,7 +477,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for r in filtered_results[:8]:
         stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os, fc, combo, early_vol, persist_sig, watch_sig = r
 
-        signals = [fs, fc, os, ss, combo, early_vol, persist_sig]
+        signals = [fs, fc, os, ss, combo, early_vol, persist_sig, watch_sig]
         signals = [s for s in signals if s]
 
         msg += (
