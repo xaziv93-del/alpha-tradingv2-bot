@@ -446,6 +446,8 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_flow_data(new_data)
     save_persistence(persist_new)
 
+    save_watchlist(watch_new)
+
     # -------- SORT --------
     results.sort(key=lambda x: x[7], reverse=True)
     no_trade = no_trade_day(results)
