@@ -207,6 +207,19 @@ def early_volatility_signal(flow, flow_change, opt, sent):
         return "⚡ Early Volatility Detected"
     return ""
     
+# -------- EXPLOSIVE SETUP --------
+def explosive_setup_signal(flow, opt, sent, persist_count):
+
+    if (
+        flow >= 3
+        and opt >= 2
+        and sent <= 2
+        and persist_count >= 2
+    ):
+        return "⚡💰 Hidden Momentum"
+
+    return ""
+
 # -------- SENTIMENT --------
 def sentiment(symbol):
     try:
