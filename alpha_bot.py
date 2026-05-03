@@ -402,6 +402,8 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             persist_count, persist_sig = persistence_signal(stock, early_vol, persist_prev)
             persist_new[stock] = persist_count
 
+            explosive_sig = explosive_setup_signal(flow, opt, sent, persist_count)
+            
             total = tech + flow + sent + opt
             ai = ai_score_v3(tech, flow, sent, opt, early_vol, persist_count)
 
