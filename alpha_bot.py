@@ -219,6 +219,33 @@ def early_volatility_signal(flow, flow_change, opt, sent):
         return "⚡ Early Volatility Detected"
     return ""
     
+# -------- MOMENTUM ENGINE --------
+def momentum_signal(symbol, ai, prev_data):
+    history = prev_data.get(symbol, [])
+
+    history.append(ai)
+
+    # keep last 3 scans
+    history = history[-3:]
+
+    signal = ""
+
+    if len(history) == 3:
+
+        # 🚀 accelerating
+        if history[0] < history[1] < history[2]:
+            signal = "🚀 Accelerating Alpha"
+
+        # ⚠️ cooling
+        elif history[0] > history[1] > history[2]:
+            signal = "⚠️ Momentum Cooling"
+
+        # 💥 breakout
+        elif history[0] < 1 and history[2] >= 4:
+            signal = "💥 Breakout Candidate"
+
+    return history, signal
+
 # -------- EXPLOSIVE SETUP --------
 def explosive_setup_signal(flow, opt, sent, persist_count):
 
