@@ -502,7 +502,14 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # -------- SAVE MEMORY --------
     save_flow_data(new_data)
     save_persistence(persist_new)
-
+    
+    save_flow_data(new_data)
+    save_persistence(persist_new)
+    save_momentum({
+        r[0]: momentum_signal(r[0], r[7], momentum_prev)[0]
+        for r in results
+    })
+    
     save_watchlist(watch_new)
 
     # -------- SORT --------
