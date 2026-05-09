@@ -414,7 +414,8 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     price_cache.clear()
     prev_data = load_flow_data()
     persist_prev = load_persistence()
-
+    momentum_prev = load_momentum()
+    
     watch_prev = load_watchlist()
     watch_new = {}
     
