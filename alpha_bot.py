@@ -69,14 +69,42 @@ def save_momentum(data):
     REDIS.set("momentum_data", json.dumps(data))
 
 # -------- WATCHLIST MEMORY --------
-def load_watchlist():
-    data = REDIS.get("watchlist_data")
-    if not data:
-        return {}
-    return data if isinstance(data, dict) else json.loads(data)
+def watchlist_signal(symbol, ai, prev_data):
+    today = datetime.utcnow().strftime("%Y-%m-%d")
 
-def save_watchlist(data):
-    REDIS.set("watchlist_data", json.dumps(data))
+    stock_data = prev_data.get(
+        symbol,
+        {
+            "count": 0,
+            "day": ""
+        }
+    )
+
+    count = stock_data["count"]
+    last_day = stock_data["day"]
+
+    signal = ""
+
+    if ai >= 3.5:
+
+        # only count once per day
+        if last_day != today:
+            count += 1
+            last_day = today
+
+    else:
+        count = 0
+
+    if count >= 3:
+        signal = "🔥 Sector Leader"
+
+    elif count == 2:
+        signal = "👀 Emerging Leader"
+
+    return {
+        "count": count,
+        "day": last_day
+    }, signal
 
 # -------- PERSISTENCE MEMORY --------
 def load_persistence():
