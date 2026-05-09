@@ -14,7 +14,7 @@ REDIS = Redis(
     url=os.getenv("REDIS_URL"),
     token=os.getenv("REDIS_TOKEN"),
 )
-REDIS.delete("momentum_data")
+
 MIN_SECTOR_STRENGTH = 0.5
 
 CHAT_ID = 8655837636
