@@ -251,18 +251,25 @@ def early_volatility_signal(flow, flow_change, opt, sent):
 def momentum_signal(symbol, ai, prev_data):
     today = datetime.utcnow().strftime("%Y-%m-%d")
 
-    stock_data = prev_data.get(
-        symbol,
-        {
+    stock_data = prev_data.get(symbol)
+
+    # backward compatibility
+    if isinstance(stock_data, list):
+        stock_data = {
+            "history": stock_data,
+            "day": ""
+        }
+
+    if not stock_data:
+        stock_data = {
             "history": [],
             "day": ""
         }
-    )
 
     history = stock_data["history"]
     last_day = stock_data["day"]
 
-    # only save once per market day
+    # only once per day
     if last_day != today:
         history.append(ai)
         history = history[-3:]
@@ -272,15 +279,12 @@ def momentum_signal(symbol, ai, prev_data):
 
     if len(history) == 3:
 
-        # 🚀 accelerating
         if history[0] < history[1] < history[2]:
             signal = "🚀 Accelerating Alpha"
 
-        # ⚠️ cooling
         elif history[0] > history[1] > history[2]:
             signal = "⚠️ Momentum Cooling"
 
-        # 💥 breakout
         elif history[0] < 1 and history[2] >= 4:
             signal = "💥 Breakout Candidate"
 
