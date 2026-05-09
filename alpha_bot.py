@@ -249,12 +249,24 @@ def early_volatility_signal(flow, flow_change, opt, sent):
     
 # -------- MOMENTUM ENGINE --------
 def momentum_signal(symbol, ai, prev_data):
-    history = prev_data.get(symbol, [])
+    today = datetime.utcnow().strftime("%Y-%m-%d")
 
-    history.append(ai)
+    stock_data = prev_data.get(
+        symbol,
+        {
+            "history": [],
+            "day": ""
+        }
+    )
 
-    # keep last 3 scans
-    history = history[-3:]
+    history = stock_data["history"]
+    last_day = stock_data["day"]
+
+    # only save once per market day
+    if last_day != today:
+        history.append(ai)
+        history = history[-3:]
+        last_day = today
 
     signal = ""
 
@@ -272,7 +284,10 @@ def momentum_signal(symbol, ai, prev_data):
         elif history[0] < 1 and history[2] >= 4:
             signal = "💥 Breakout Candidate"
 
-    return history, signal
+    return {
+        "history": history,
+        "day": last_day
+    }, signal
 
 # -------- EXPLOSIVE SETUP --------
 def explosive_setup_signal(flow, opt, sent, persist_count):
