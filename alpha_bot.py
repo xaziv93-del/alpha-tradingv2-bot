@@ -447,6 +447,8 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             total = tech + flow + sent + opt
             ai = ai_score_v3(tech, flow, sent, opt, early_vol, persist_count)
 
+            momentum_history, momentum_sig = momentum_signal(stock, ai, momentum_prev)
+            
             prev_watch = watch_prev.get(stock, 0)
 
             # only count strong setups
