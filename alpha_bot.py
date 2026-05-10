@@ -470,18 +470,18 @@ def pre_filter(stock):
 
 # -------- SCAN --------
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
-try:
-    price_cache.clear()
-    prev_data = load_flow_data()
-    persist_prev = load_persistence()
-    momentum_prev = load_momentum()
+    try:
+        price_cache.clear()
+        prev_data = load_flow_data()
+        persist_prev = load_persistence()
+        momentum_prev = load_momentum()
     
-    watch_prev = load_watchlist()
-    watch_new = {}
+        watch_prev = load_watchlist()
+        watch_new = {}
     
-    new_data = {}
-    persist_new = {}
-    results = []
+        new_data = {}
+        persist_new = {}
+        results = []
 
     for sector, tickers in stocks.items():
         for stock in tickers:
@@ -616,10 +616,10 @@ try:
         )
 
     await update.message.reply_text(msg)
-except Exception as e:
-        await update.message.reply_text(
-            f"DEBUG ERROR:\n{str(e)}"
-    )
+    except Exception as e:
+            await update.message.reply_text(
+                f"DEBUG ERROR:\n{str(e)}"
+        )
 
 # -------- ALERTS --------
 async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
