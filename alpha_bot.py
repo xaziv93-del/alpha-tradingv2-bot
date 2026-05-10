@@ -638,7 +638,7 @@ async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
 
             ai = ai_score_v3(tech, flow, sent, opt, "", 0)
 
-            temp_results.append((stock, sector, ai, flow, opt))
+            temp_results.append((stock, sector, ai, flow, opt, tech))
 
             if sector not in sector_scores:
                 sector_scores[sector] = []
