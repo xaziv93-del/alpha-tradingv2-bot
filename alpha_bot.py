@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import os
 import requests
-from datetime import time
+from datetime import datetime, time
 import pytz
 import json
 from upstash_redis import Redis
