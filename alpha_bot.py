@@ -508,22 +508,13 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             momentum_history, momentum_sig = momentum_signal(stock, ai, momentum_prev)
             
-            prev_watch = watch_prev.get(stock, 0)
+            watch_data, watch_sig = watchlist_signal(
+                stock,
+                ai,
+                watch_prev
+            )
 
-            # only count strong setups
-            if ai >= 3.5:
-                watch_count = prev_watch + 1
-            else:
-                watch_count = 0
-
-            if watch_count >= 3:
-                watch_sig = "🔥 Sector Leader"
-            elif watch_count == 2:
-                watch_sig = "👀 Emerging Leader"
-            else:
-                watch_sig = ""
-
-            watch_new[stock] = watch_count
+            watch_new[stock] = watch_data
             
             results.append(
                 (stock, sector, total, tech, flow, sent, opt, ai,
