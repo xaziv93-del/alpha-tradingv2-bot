@@ -470,6 +470,7 @@ def pre_filter(stock):
 
 # -------- SCAN --------
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
     price_cache.clear()
     prev_data = load_flow_data()
     persist_prev = load_persistence()
@@ -615,7 +616,10 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     await update.message.reply_text(msg)
-
+    except Exception as e:
+            await update.message.reply_text(
+                f"DEBUG ERROR:\n{str(e)}"
+        )
 
 # -------- ALERTS --------
 async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
