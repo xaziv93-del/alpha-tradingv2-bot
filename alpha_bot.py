@@ -535,7 +535,13 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             sector_scores[sector] = []
 
         sector_scores[sector].append(ai)
-
+    
+    if not sector_scores:
+        await update.message.reply_text(
+            "🚫 No valid setups found today.\nMarket quiet or filters too strict."
+        )
+        return
+    
     # normalize sectors
     max_score = max(sum(vals)/len(vals) for vals in sector_scores.values())
 
