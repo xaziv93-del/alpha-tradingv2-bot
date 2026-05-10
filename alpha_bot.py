@@ -662,7 +662,7 @@ async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
     }
 
     # -------- ALERT LOGIC --------
-    for stock, sector, ai, flow, opt in temp_results:
+    for stock, sector, ai, flow, opt, tech in temp_results:
 
         # 🔥 SECTOR FILTER
         if sector not in STRONG_SECTORS:
