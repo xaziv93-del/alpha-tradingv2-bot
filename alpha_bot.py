@@ -472,153 +472,166 @@ def pre_filter(stock):
 async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         price_cache.clear()
+
         prev_data = load_flow_data()
         persist_prev = load_persistence()
         momentum_prev = load_momentum()
-    
+
         watch_prev = load_watchlist()
         watch_new = {}
-    
+
         new_data = {}
         persist_new = {}
+        momentum_new = {}
         results = []
 
-    for sector, tickers in stocks.items():
-        for stock in tickers:
+        for sector, tickers in stocks.items():
+            for stock in tickers:
 
-            # 🔪 PRE-FILTER
-            if not pre_filter(stock):
-                continue
+                if not pre_filter(stock):
+                    continue
 
-            tech = technical_score(stock)
-            flow, flow_sig = smart_money(stock)
-            opt, opt_sig = options_flow(stock)
-            sent, sent_sig = sentiment(stock)
+                tech = technical_score(stock)
+                flow, flow_sig = smart_money(stock)
+                opt, opt_sig = options_flow(stock)
+                sent, sent_sig = sentiment(stock)
 
-            flow_change = flow_change_signal(stock, flow, prev_data)
-            combo = combo_signal(flow, flow_change, opt)
-            early_vol = early_volatility_signal(flow, flow_change, opt, sent)
+                flow_change = flow_change_signal(
+                    stock,
+                    flow,
+                    prev_data
+                )
 
-            persist_count, persist_sig = persistence_signal(stock, early_vol, persist_prev)
-            persist_new[stock] = persist_count
+                combo = combo_signal(
+                    flow,
+                    flow_change,
+                    opt
+                )
 
-            explosive_sig = explosive_setup_signal(flow, opt, sent, persist_count)
-            
-            total = tech + flow + sent + opt
-            ai = ai_score_v3(tech, flow, sent, opt, early_vol, persist_count)
+                early_vol = early_volatility_signal(
+                    flow,
+                    flow_change,
+                    opt,
+                    sent
+                )
 
-            momentum_history, momentum_sig = momentum_signal(stock, ai, momentum_prev)
-            
-            watch_data, watch_sig = watchlist_signal(
-                stock,
-                ai,
-                watch_prev
-            )
+                persist_count, persist_sig = persistence_signal(
+                    stock,
+                    early_vol,
+                    persist_prev
+                )
 
-            watch_new[stock] = watch_data
-            
-            results.append(
-                (stock, sector, total, tech, flow, sent, opt, ai,
-                 flow_sig, sent_sig, opt_sig, flow_change,
-                 combo, early_vol, persist_sig, watch_sig, explosive_sig, momentum_sig)
-            )
+                persist_new[stock] = persist_count
 
-            new_data[stock] = flow
+                explosive_sig = explosive_setup_signal(
+                    flow,
+                    opt,
+                    sent,
+                    persist_count
+                )
 
-    # -------- SECTOR STRENGTH --------
-    sector_scores = {}
+                total = tech + flow + sent + opt
 
-    for r in results:
-        sector = r[1]
-        ai = r[7]
+                ai = ai_score_v3(
+                    tech,
+                    flow,
+                    sent,
+                    opt,
+                    early_vol,
+                    persist_count
+                )
 
-        if sector not in sector_scores:
-            sector_scores[sector] = []
+                momentum_data, momentum_sig = momentum_signal(
+                    stock,
+                    ai,
+                    momentum_prev
+                )
 
-        sector_scores[sector].append(ai)
-    
-    if not sector_scores:
-        await update.message.reply_text(
-            "🚫 No valid setups found today.\nMarket quiet or filters too strict."
-        )
-        return
-    
-    # normalize sectors
-    max_score = max(sum(vals)/len(vals) for vals in sector_scores.values())
+                momentum_new[stock] = momentum_data
 
-    sector_avg = {
-        s: round((sum(vals)/len(vals)) / max_score, 2)
-        for s, vals in sector_scores.items()
-    }
+                watch_data, watch_sig = watchlist_signal(
+                    stock,
+                    ai,
+                    watch_prev
+                )
 
-    STRONG_SECTORS = {
-    s for s, score in sector_avg.items()
-    if score >= MIN_SECTOR_STRENGTH
-    }
-    
-    # -------- SAVE MEMORY --------
-    save_flow_data(new_data)
-    save_persistence(persist_new)
+                watch_new[stock] = watch_data
 
-    save_momentum({
-        r[0]: momentum_signal(
-            r[0],
-            r[7],
-            momentum_prev
-        )[0]
-        for r in results
-    })
+                results.append(
+                    (
+                        stock, sector,
+                        total, tech, flow, sent, opt, ai,
+                        flow_sig, sent_sig, opt_sig,
+                        flow_change, combo, early_vol,
+                        persist_sig, watch_sig,
+                        explosive_sig, momentum_sig
+                    )
+                )
 
-    save_watchlist(watch_new)
+                new_data[stock] = flow
 
-    # -------- SORT --------
-    results.sort(key=lambda x: x[7], reverse=True)
-    no_trade = no_trade_day(results)
-
-    # -------- BUILD MESSAGE --------
-    msg = "🚨 FULL ALPHA SCAN (FLOW INTELLIGENCE MODE)\n\n"
-
-    # 📊 Sector strength
-    msg += "📊 SECTOR STRENGTH:\n\n"
-    top_sectors = sorted(sector_avg.items(), key=lambda x: x[1], reverse=True)
-
-    for s, score in top_sectors[:5]:
-        msg += f"{s}: {score}\n"
-
-    msg += "\n"
-
-    # 🚫 No trade filter
-    if no_trade:
-        msg += "🚫 NO TRADE DAY DETECTED\nMarket weak — stay patient 🎯\n\n"
-
-    msg += "🔥 TOP PLAYS:\n\n"
-
-    # -------- TOP STOCKS --------
-    filtered_results = [
-        r for r in results
-        if r[1] in STRONG_SECTORS
-    ]
-
-    for r in filtered_results[:8]:
-        stock, sector, total, tech, flow, sent, opt, ai, fs, ss, os, fc, combo, early_vol, persist_sig, watch_sig, explosive_sig, momentum_sig = r
-
-        signals = [fs, fc, os, ss, combo, early_vol, persist_sig, watch_sig, explosive_sig, momentum_sig]
-        signals = [s for s in signals if s]
-
-        msg += (
-            f"{stock} ({sector})\n"
-            f"AI Score: {ai} | Total: {total}/20\n\n"
-            f"Technical: {tech}/5\n"
-            f"Flow: {flow}/5\n"
-            f"Options: {opt}/5\n"
-            f"Sentiment: {sent}/5\n\n"
-            + "\n".join(signals) + "\n\n"
-        )
-
-    await update.message.reply_text(msg)
-    except Exception as e:
+        if not results:
             await update.message.reply_text(
-                f"DEBUG ERROR:\n{str(e)}"
+                "🚫 No valid setups found."
+            )
+            return
+
+        # save memory
+        save_flow_data(new_data)
+        save_persistence(persist_new)
+        save_watchlist(watch_new)
+        save_momentum(momentum_new)
+
+        results.sort(
+            key=lambda x: x[7],
+            reverse=True
+        )
+
+        msg = "🚨 FULL ALPHA SCAN (FLOW INTELLIGENCE MODE)\n\n"
+
+        for r in results[:8]:
+
+            (
+                stock, sector,
+                total, tech, flow, sent, opt, ai,
+                fs, ss, os, fc,
+                combo, early_vol,
+                persist_sig, watch_sig,
+                explosive_sig, momentum_sig
+            ) = r
+
+            signals = [
+                fs,
+                fc,
+                os,
+                ss,
+                combo,
+                early_vol,
+                persist_sig,
+                watch_sig,
+                explosive_sig,
+                momentum_sig
+            ]
+
+            signals = [s for s in signals if s]
+
+            msg += (
+                f"{stock} ({sector})\n"
+                f"AI Score: {ai} | Total: {total}/20\n\n"
+                f"Technical: {tech}/5\n"
+                f"Flow: {flow}/5\n"
+                f"Options: {opt}/5\n"
+                f"Sentiment: {sent}/5\n\n"
+                + "\n".join(signals)
+                + "\n\n"
+            )
+
+        await update.message.reply_text(msg)
+
+    except Exception as e:
+
+        await update.message.reply_text(
+            f"DEBUG ERROR:\n{str(e)}"
         )
 
 # -------- ALERTS --------
