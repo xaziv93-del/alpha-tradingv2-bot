@@ -469,8 +469,8 @@ def pre_filter(stock):
     return True
 
 # -------- SCAN --------
-async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
+async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE): try:
+    
     price_cache.clear()
     prev_data = load_flow_data()
     persist_prev = load_persistence()
