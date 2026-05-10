@@ -84,13 +84,20 @@ def save_watchlist(data):
 def watchlist_signal(symbol, ai, prev_data):
     today = datetime.utcnow().strftime("%Y-%m-%d")
 
-    stock_data = prev_data.get(
-        symbol,
-        {
+    stock_data = prev_data.get(symbol)
+
+    # backward compatibility
+    if isinstance(stock_data, int):
+        stock_data = {
+            "count": stock_data,
+            "day": ""
+        }
+
+    if not stock_data:
+        stock_data = {
             "count": 0,
             "day": ""
         }
-    )
 
     count = stock_data["count"]
     last_day = stock_data["day"]
@@ -99,7 +106,6 @@ def watchlist_signal(symbol, ai, prev_data):
 
     if ai >= 3.5:
 
-        # only count once per day
         if last_day != today:
             count += 1
             last_day = today
