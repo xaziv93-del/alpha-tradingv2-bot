@@ -342,6 +342,9 @@ def sentiment(symbol):
         if not news:
             return 0, "😐 No Coverage"
 
+        if len(news) < 3:
+            return 2, "😐 Limited Coverage"
+        
         score = 0
 
         positive_words = [
