@@ -679,7 +679,8 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 persist_sig,
                 watch_sig,
                 explosive_sig,
-                momentum_sig
+                momentum_sig,
+                catalyst_sig
             ]
 
             signals = [s for s in signals if s]
