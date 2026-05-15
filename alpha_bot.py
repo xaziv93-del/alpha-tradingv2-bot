@@ -563,7 +563,8 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 flow, flow_sig = smart_money(stock)
                 opt, opt_sig = options_flow(stock)
                 sent, sent_sig = sentiment(stock)
-
+                catalyst_sig = catalyst_signal(stock)
+                
                 flow_change = flow_change_signal(
                     stock,
                     flow,
