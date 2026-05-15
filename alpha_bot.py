@@ -20,7 +20,7 @@ MIN_SECTOR_STRENGTH = 0.5
 CHAT_ID = 8655837636
 
 price_cache = {}
-news_cache = None
+
 
 # -------- EXPANDED STOCK UNIVERSE (~150) --------
 stocks = {
