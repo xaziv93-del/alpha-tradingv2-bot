@@ -460,6 +460,51 @@ def catalyst_signal(symbol):
     except:
         return ""
 
+# -------- RELATIVE STRENGTH --------
+def relative_strength_signal(symbol):
+    try:
+
+        stock = get_price(symbol)
+        qqq = get_price("QQQ")
+
+        stock_c = stock.get("c")
+        stock_pc = stock.get("pc")
+
+        qqq_c = qqq.get("c")
+        qqq_pc = qqq.get("pc")
+
+        if not all([
+            stock_c,
+            stock_pc,
+            qqq_c,
+            qqq_pc
+        ]):
+            return ""
+
+        stock_change = (
+            stock_c - stock_pc
+        ) / stock_pc
+
+        qqq_change = (
+            qqq_c - qqq_pc
+        ) / qqq_pc
+
+        edge = stock_change - qqq_change
+
+        if edge >= 0.03:
+            return "⚔️ Crushing QQQ"
+
+        elif edge >= 0.015:
+            return "⚔️ Outperforming QQQ"
+
+        elif edge <= -0.03:
+            return "🥶 Lagging QQQ"
+
+        return ""
+
+    except:
+        return ""
+
 # -------- AI SCORE --------
 def ai_score_v3(tech, flow, sent, opt, early_vol, persist_count):
     score = (
