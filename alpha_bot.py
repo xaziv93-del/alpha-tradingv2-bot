@@ -324,41 +324,54 @@ def explosive_setup_signal(flow, opt, sent, persist_count):
 
     return ""
 
-# -------- SENTIMENT --------
+# -------- COMPANY SENTIMENT V2 --------
 def sentiment(symbol):
     try:
-        global news_cache
+        today = datetime.utcnow().strftime("%Y-%m-%d")
 
-        if news_cache is None:
-            url = f"https://finnhub.io/api/v1/news?category=general&token={FINNHUB_API_KEY}"
-            news_cache = requests.get(url).json()
+        url = (
+            f"https://finnhub.io/api/v1/company-news"
+            f"?symbol={symbol}"
+            f"&from={today}"
+            f"&to={today}"
+            f"&token={FINNHUB_API_KEY}"
+        )
 
-        news = news_cache
+        news = requests.get(url).json()
+
+        if not news:
+            return 0, "😐 No Coverage"
 
         score = 0
-        mentions = 0
 
         positive_words = [
             "surge","rally","soars","breakout","beats",
-            "bullish","upgrade","strong","record","momentum",
-            "growth","expansion","outperform"
+            "bullish","upgrade","strong","record",
+            "growth","expansion","outperform",
+            "contract","partnership","award"
         ]
 
         negative_words = [
             "drop","falls","miss","downgrade","weak",
-            "lawsuit","risk","decline","cut","bearish",
-            "loss","warning"
+            "lawsuit","risk","decline","cut",
+            "bearish","loss","warning","delay"
         ]
 
-        for article in news[:30]:
-            headline = article.get("headline", "").lower()
-            summary = article.get("summary", "").lower()
+        mentions = 0
+
+        for article in news[:20]:
+
+            headline = article.get(
+                "headline",
+                ""
+            ).lower()
+
+            summary = article.get(
+                "summary",
+                ""
+            ).lower()
 
             text = headline + " " + summary
-
-            # 🎯 RELEVANCE FILTER (strong upgrade)
-            if symbol.lower() not in text:
-                continue
 
             mentions += 1
 
@@ -370,32 +383,27 @@ def sentiment(symbol):
                 if word in text:
                     score -= 1
 
-        # 🧠 Normalize score
-        if mentions == 0:
-            return 0, "😐 No Coverage"
+        norm_score = score / max(
+            mentions,
+            1
+        )
 
-        norm_score = score / mentions
-
-        # 🎯 FINAL SIGNAL
         if norm_score >= 1:
-            signal = "🔥 Strong Bullish Sentiment"
-            final_score = 5
+            return 5, "🔥 Strong Bullish Sentiment"
+
         elif norm_score >= 0.3:
-            signal = "📈 Bullish Bias"
-            final_score = 3
+            return 3, "📈 Bullish Bias"
+
         elif norm_score <= -1:
-            signal = "💀 Strong Bearish Sentiment"
-            final_score = 0
+            return 0, "💀 Strong Bearish Sentiment"
+
         elif norm_score <= -0.3:
-            signal = "📉 Bearish Bias"
-            final_score = 1
+            return 1, "📉 Bearish Bias"
+
         else:
-            signal = "😐 Neutral Sentiment"
-            final_score = 2
+            return 2, "😐 Neutral Sentiment"
 
-        return final_score, signal
-
-    except:
+    except Exception:
         return 0, "Error"
 
 # -------- AI SCORE --------
