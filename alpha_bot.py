@@ -666,7 +666,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 fs, ss, os, fc,
                 combo, early_vol,
                 persist_sig, watch_sig,
-                explosive_sig, momentum_sig
+                explosive_sig, momentum_sig, catalyst_sig
             ) = r
 
             signals = [
