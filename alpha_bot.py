@@ -409,6 +409,57 @@ def sentiment(symbol):
     except Exception:
         return 0, "Error"
 
+# -------- CATALYST ENGINE --------
+def catalyst_signal(symbol):
+    try:
+        today = datetime.utcnow().strftime("%Y-%m-%d")
+
+        url = (
+            f"https://finnhub.io/api/v1/company-news"
+            f"?symbol={symbol}"
+            f"&from={today}"
+            f"&to={today}"
+            f"&token={FINNHUB_API_KEY}"
+        )
+
+        news = requests.get(url).json()
+
+        if not news:
+            return ""
+
+        text = ""
+
+        for article in news[:10]:
+            headline = article.get("headline", "").lower()
+            summary = article.get("summary", "").lower()
+
+            text += headline + " " + summary + " "
+
+        if "earnings" in text or "beats" in text:
+            return "🗓 Earnings Catalyst"
+
+        elif "upgrade" in text:
+            return "⬆ Analyst Upgrade"
+
+        elif "contract" in text or "award" in text:
+            return "🏆 Contract Award"
+
+        elif "partnership" in text:
+            return "🤝 Partnership"
+
+        elif (
+            "downgrade" in text
+            or "lawsuit" in text
+            or "warning" in text
+            or "delay" in text
+        ):
+            return "⚠️ Risk Event"
+
+        return ""
+
+    except:
+        return ""
+
 # -------- AI SCORE --------
 def ai_score_v3(tech, flow, sent, opt, early_vol, persist_count):
     score = (
