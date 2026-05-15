@@ -650,9 +650,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # -------- ALERTS --------
 async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
-    global news_cache
-    news_cache = None  # 🔥 reset news each run
-
+    
     prev_alerts = load_alerts()
     new_alerts = {}
 
