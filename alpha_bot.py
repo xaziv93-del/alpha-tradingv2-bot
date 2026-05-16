@@ -44,6 +44,18 @@ stocks = {
     "Macro_Regime_Sensors": ["GLD","TLT","URA","XLF","XLI","SOXX","BITO","KWEB","TAN","ITA"]
 }
 
+PRIMARY_SECTOR = {
+
+    "PLTR": "Defense",
+
+    "MSFT": "AI",
+    "GOOGL": "AI",
+    "AMZN": "AI",
+
+    "QQQ": "ETF",
+    "SPY": "ETF"
+}
+
 # -------- FLOW MEMORY --------
 def load_flow_data():
     data = REDIS.get("flow_data")
