@@ -803,6 +803,10 @@ async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
 
     max_score = max(sum(vals)/len(vals) for vals in sector_scores.values())
 
+    # sector guard
+    if max_score <= 0:
+        return
+    
     sector_avg = {
         s: round((sum(vals)/len(vals)) / max_score, 2)
         for s, vals in sector_scores.items()
