@@ -354,16 +354,7 @@ def get_news(symbol):
 # -------- COMPANY SENTIMENT V2 --------
 def sentiment(symbol):
     try:
-        today = datetime.utcnow().strftime("%Y-%m-%d")
-
-        url = (
-            f"https://finnhub.io/api/v1/company-news"
-            f"?symbol={symbol}"
-            f"&from={today}"
-            f"&to={today}"
-            f"&token={FINNHUB_API_KEY}"
-        )
-
+        
         news = get_news(symbol)
         if not news:
             return 0, "😐 No Coverage"
@@ -438,16 +429,7 @@ def sentiment(symbol):
 # -------- CATALYST ENGINE --------
 def catalyst_signal(symbol):
     try:
-        today = datetime.utcnow().strftime("%Y-%m-%d")
-
-        url = (
-            f"https://finnhub.io/api/v1/company-news"
-            f"?symbol={symbol}"
-            f"&from={today}"
-            f"&to={today}"
-            f"&token={FINNHUB_API_KEY}"
-        )
-
+    
         news = get_news(symbol)
         if not news:
             return ""
