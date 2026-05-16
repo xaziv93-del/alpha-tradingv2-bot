@@ -157,7 +157,7 @@ def save_persistence(data):
 def persistence_signal(symbol, early_vol, prev_data):
     prev_count = prev_data.get(symbol, 0)
 
-    if "⚡" in early_vol:
+    if early_vol and "⚡" in early_vol:
         new_count = prev_count + 1
     else:
         new_count = 0
