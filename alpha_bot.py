@@ -773,10 +773,15 @@ async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
     # -------- BUILD TEMP RESULTS + SECTOR STRENGTH --------
     sector_scores = {}
     temp_results = []
-
+    seen = set()
+    
     for sector, tickers in stocks.items():
         for stock in tickers:
 
+            if stock in seen:
+                continue
+            seen.add(stock)
+            
             if not pre_filter(stock):
                 continue
 
