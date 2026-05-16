@@ -329,6 +329,27 @@ def explosive_setup_signal(flow, opt, sent, persist_count):
 
     return ""
 
+#--------News/less api calls-------
+def get_news(symbol):
+    try:
+        today = datetime.utcnow().strftime("%Y-%m-%d")
+
+        url = (
+            f"https://finnhub.io/api/v1/company-news"
+            f"?symbol={symbol}"
+            f"&from={today}"
+            f"&to={today}"
+            f"&token={FINNHUB_API_KEY}"
+        )
+
+        return requests.get(
+            url,
+            timeout=5
+        ).json()
+
+    except:
+        return []
+
 # -------- COMPANY SENTIMENT V2 --------
 def sentiment(symbol):
     try:
