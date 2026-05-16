@@ -486,23 +486,53 @@ def catalyst_signal(symbol):
         return ""
 
 # -------- RELATIVE STRENGTH --------
-def relative_strength_signal(symbol):
+def relative_strength_signal(symbol, sector):
     try:
 
+        benchmarks = {
+            "AI": "QQQ",
+            "Momentum": "QQQ",
+
+            "Semiconductors": "SMH",
+            "Semiconductor_Expansion": "SMH",
+
+            "Energy": "XLE",
+
+            "Finance": "XLF",
+
+            "Defense": "ITA",
+            "Space": "ITA",
+            "Space_Defense_Expansion": "ITA",
+
+            "Biotech": "XBI",
+            "Biotech_Event_Driven": "XBI",
+
+            "ETF": "SPY",
+
+            "Quantum": "QQQ",
+
+            "Macro_Regime_Sensors": "SPY"
+        }
+
+        benchmark = benchmarks.get(
+            sector,
+            "SPY"
+        )
+
         stock = get_price(symbol)
-        qqq = get_price("QQQ")
+        bench = get_price(benchmark)
 
         stock_c = stock.get("c")
         stock_pc = stock.get("pc")
 
-        qqq_c = qqq.get("c")
-        qqq_pc = qqq.get("pc")
+        bench_c = bench.get("c")
+        bench_pc = bench.get("pc")
 
         if not all([
             stock_c,
             stock_pc,
-            qqq_c,
-            qqq_pc
+            bench_c,
+            bench_pc
         ]):
             return ""
 
@@ -510,20 +540,20 @@ def relative_strength_signal(symbol):
             stock_c - stock_pc
         ) / stock_pc
 
-        qqq_change = (
-            qqq_c - qqq_pc
-        ) / qqq_pc
+        bench_change = (
+            bench_c - bench_pc
+        ) / bench_pc
 
-        edge = stock_change - qqq_change
+        edge = stock_change - bench_change
 
         if edge >= 0.03:
-            return "⚔️ Crushing QQQ"
+            return "⚔️ Crushing Sector"
 
         elif edge >= 0.015:
-            return "⚔️ Outperforming QQQ"
+            return "⚔️ Outperforming Sector"
 
         elif edge <= -0.03:
-            return "🥶 Lagging QQQ"
+            return "🥶 Lagging Sector"
 
         return ""
 
