@@ -6,6 +6,7 @@ from datetime import datetime, time
 import pytz
 import json
 from upstash_redis import Redis
+import time as sleep
 
 TOKEN = os.getenv("BOT_TOKEN")
 FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
