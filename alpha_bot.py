@@ -765,6 +765,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # -------- ALERTS --------
 async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
     
+    price_cache.clear()
     prev_alerts = load_alerts()
     new_alerts = {}
 
