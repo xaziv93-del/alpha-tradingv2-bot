@@ -164,8 +164,7 @@ def get_price(symbol):
         return price_cache[symbol]
 
     url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
-    data = requests.get(url).json()
-
+    data = requests.get(url, timeout=5).json()
     price_cache[symbol] = data
     return data
 
