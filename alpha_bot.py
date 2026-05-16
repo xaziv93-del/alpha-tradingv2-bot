@@ -34,7 +34,13 @@ stocks = {
     "Quantum": ["IONQ","QBTS","RGTI","IBM","GOOGL","MSFT","AMZN"],
     "Momentum": ["TSLA","COIN","MSTR","RBLX","SHOP","SQ","ROKU","AFRM","UPST","DKNG"],
     "Finance": ["JPM","GS","MS","BAC","C","SCHW","PYPL","V","MA"],
-    "ETF": ["SPY","QQQ","IWM","SMH","XLE","XLK","ARKK"]
+    "ETF": ["SPY","QQQ","IWM","SMH","XLE","XLK","ARKK"],
+    "AI_Infrastructure": ["ANET","DELL","HPE","VRT","ETN","APH","CIEN","CRDO"],
+    "Space_Defense_Expansion": ["MDA","RDW","BKSY","SIDU","LLAP","SPIR","JOBY","ACHR"],
+    "Semiconductor_Expansion": ["MPWR","ENTG","COHR","FORM","WOLF","ACLS","ALGM","CAMT"],
+    "Biotech_Event_Driven": ["SAVA","VKTX","SRPT","RXRX","EXEL","ALNY","NTLA","BEAM"],
+    "Flow_Momentum_Expansion": ["HOOD","APP","CELH","CAVA","ARM","NET","DDOG","U"],
+    "Macro_Regime_Sensors": ["GLD","TLT","URA","XLF","XLI","SOXX","BITO","KWEB","TAN","ITA"]
 }
 
 # -------- FLOW MEMORY --------
