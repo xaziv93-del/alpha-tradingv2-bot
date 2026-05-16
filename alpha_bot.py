@@ -626,7 +626,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         for sector, tickers in stocks.items():
             for stock in tickers:
-
+                sleep.sleep(0.05)
                 if stock in seen:
                     continue
                 seen.add(stock)
