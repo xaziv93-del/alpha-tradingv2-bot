@@ -329,7 +329,7 @@ def explosive_setup_signal(flow, opt, sent, persist_count):
 
     return ""
 
-#--------News/less api calls-------
+# -------- News/fetcher -------
 def get_news(symbol):
     try:
         today = datetime.utcnow().strftime("%Y-%m-%d")
@@ -363,7 +363,7 @@ def sentiment(symbol):
             f"&token={FINNHUB_API_KEY}"
         )
 
-        news = requests.get(url, timeout=5).json()
+        news = get_news(symbol)
         if not news:
             return 0, "😐 No Coverage"
 
@@ -447,7 +447,7 @@ def catalyst_signal(symbol):
             f"&token={FINNHUB_API_KEY}"
         )
 
-        news = requests.get(url, timeout=5).json()
+        news = get_news(symbol)
         if not news:
             return ""
 
