@@ -23,7 +23,7 @@ CHAT_ID = 8655837636
 price_cache = {}
 
 
-# -------- EXPANDED STOCK UNIVERSE (~150) --------
+# -------- EXPANDED STOCK UNIVERSE (~200) --------
 stocks = {
 
     "AI": ["NVDA","AMD","MSFT","GOOGL","AMZN","META","ORCL","ADBE","CRM","SMCI","SNOW","PLTR"], 
@@ -473,6 +473,7 @@ def relative_strength_signal(symbol, sector):
 
         benchmarks = {
             "AI": "QQQ",
+            "AI_Infrastructure": "QQQ",
             "Momentum": "QQQ",
 
             "Semiconductors": "SMH",
