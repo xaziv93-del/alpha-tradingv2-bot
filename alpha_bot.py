@@ -603,10 +603,15 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
         persist_new = {}
         momentum_new = {}
         results = []
-
+        seen = set()
+        
         for sector, tickers in stocks.items():
             for stock in tickers:
 
+                if stock in seen:
+                    continue
+                seen.add(stock)
+                
                 if not pre_filter(stock):
                     continue
 
