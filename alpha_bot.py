@@ -553,7 +553,7 @@ def ai_score_v3(tech, flow, sent, opt, early_vol, persist_count):
     )
 
     # ⚡ Early volatility boost
-    if "⚡" in early_vol:
+    if early_vol and "⚡" in early_vol:
         score += 0.5
 
     # 🔁 Persistence boost
