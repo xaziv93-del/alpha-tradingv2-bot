@@ -654,6 +654,15 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await asyncio.sleep(0.05)
                 if stock in seen:
                     continue
+
+                primary_sector = PRIMARY_SECTOR.get(
+                    stock,
+                    sector
+                )
+
+                if primary_sector != sector:
+                    continue
+
                 seen.add(stock)
                 
                 if not pre_filter(stock):
@@ -825,6 +834,15 @@ async def auto_scan(context: ContextTypes.DEFAULT_TYPE):
             await asyncio.sleep(0.05)
             if stock in seen:
                 continue
+
+            primary_sector = PRIMARY_SECTOR.get(
+                stock,
+                sector
+            )
+
+            if primary_sector != sector:
+                continue
+
             seen.add(stock)
             
             if not pre_filter(stock):
