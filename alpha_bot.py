@@ -426,8 +426,7 @@ def catalyst_signal(symbol):
             f"&token={FINNHUB_API_KEY}"
         )
 
-        news = requests.get(url).json()
-
+        news = requests.get(url, timeout=5).json()
         if not news:
             return ""
 
