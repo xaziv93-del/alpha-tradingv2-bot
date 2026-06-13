@@ -800,6 +800,17 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reverse=True
         )
 
+        # -------- WEAK MARKET FILTER --------
+        if results[0][7] < 3.0:
+
+            await update.message.reply_text(
+                "⚠️ WEAK MARKET REGIME\n\n"
+                "No high-conviction setups detected.\n\n"
+                "Patience is a position."
+            )
+
+            return
+        
         msg = "🚨 FULL ALPHA SCAN (FLOW INTELLIGENCE MODE)\n\n"
 
         for r in results[:8]:
