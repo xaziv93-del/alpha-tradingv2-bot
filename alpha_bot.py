@@ -726,23 +726,6 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 persist_new[stock] = persist_count
 
-                explosive_sig = explosive_setup_signal(
-                    flow,
-                    opt,
-                    sent,
-                    persist_count
-                )
-
-                elite_sig = elite_setup_signal(
-                    tech,
-                    flow,
-                    opt,
-                    ai,
-                    combo,
-                    early_vol,
-                    rs_sig
-                )
-                
                 total = tech + flow + sent + opt
 
                 ai = ai_score_v3(
@@ -753,6 +736,8 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     early_vol,
                     persist_count
                 )
+                
+                
 
                 momentum_data, momentum_sig = momentum_signal(
                     stock,
