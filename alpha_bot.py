@@ -342,6 +342,30 @@ def explosive_setup_signal(flow, opt, sent, persist_count):
 
     return ""
 
+# -------- ELITE SETUP --------
+def elite_setup_signal(
+    tech,
+    flow,
+    opt,
+    ai,
+    combo,
+    early_vol,
+    rs_sig
+):
+
+    if (
+        tech >= 5
+        and flow >= 5
+        and opt >= 4
+        and ai >= 4.5
+        and combo
+        and early_vol
+        and "Crushing" in rs_sig
+    ):
+        return "👑 ELITE ALPHA SETUP"
+
+    return ""
+
 # -------- News/fetcher -------
 def get_news(symbol):
     try:
