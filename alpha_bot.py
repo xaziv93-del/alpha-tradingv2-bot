@@ -814,6 +814,7 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ) = r
 
             signals = [
+                elite_sig,
                 fs,
                 fc,
                 os,
