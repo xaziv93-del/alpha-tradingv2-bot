@@ -733,6 +733,16 @@ async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     persist_count
                 )
 
+                elite_sig = elite_setup_signal(
+                    tech,
+                    flow,
+                    opt,
+                    ai,
+                    combo,
+                    early_vol,
+                    rs_sig
+                )
+                
                 total = tech + flow + sent + opt
 
                 ai = ai_score_v3(
